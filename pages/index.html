@@ -2,37 +2,27 @@
 <html>
    <head>
    	   <title>对话框</title>
-   	   <meta name="viewprot" content="width=device-width;initial-scale=1.0;minimun-scale=1.0;maximun-scale=1.0;user-scalable=no">
+       <meta charset="utf8">
+   	   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+       <link rel="stylesheet" href="../css/index.css"/>
    </head>
    <body>
-      <!--
-
-Follow me on
-Dribbble: https://dribbble.com/supahfunk
-Twitter: https://twitter.com/supahfunk
-Codepen: https://codepen.io/supah/
-
-It's just a concept, a fake chat to design a new daily UI for direct messaging.
-Hope you like it :)
-
--->
-
-<div class="chat">
-  <div class="chat-title">
-    <h1>Fabio Ottaviani</h1>
-    <h2>Supah</h2>
-    <figure class="avatar">
-      <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>
-  </div>
-  <div class="messages">
-    <div class="messages-content"></div>
-  </div>
-  <div class="message-box">
-    <textarea type="text" class="message-input" placeholder="Type message..."></textarea>
-    <button type="submit" class="message-submit">Send</button>
-  </div>
-
-</div>
-<div class="bg"></div>
+      <div class="pages">
+        <div class="messages">
+            <div class="message-content">
+              <div class="mCSB_container"></div>
+            </div>
+        </div>
+          <footer>
+            <div class='voice'>
+              <input placeholder="请输入" />
+            </div>
+          </footer>
+      </div>
+      <script src="../js/rem.js"></script>  
+       <script src="../js/jquery-1.8.3.min.js"></script>
+       <script src="../js/jquery.mCustomScrollbar.concat.min.js"></script>
+       <script src="../js/index.js"></script>
    </body>	
 </html>
