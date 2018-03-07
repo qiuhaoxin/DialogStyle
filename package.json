@@ -1,0 +1,26 @@
+{
+  "name": "dialogstyle",
+  "version": "1.0.0",
+  "description": "some style for dialog page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qiuhaoxin/DialogStyle.git"
+  },
+  "keywords": [
+    "dialog",
+    "style"
+  ],
+  "author": "qiuhaoxin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qiuhaoxin/DialogStyle/issues"
+  },
+  "homepage": "https://github.com/qiuhaoxin/DialogStyle#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}
