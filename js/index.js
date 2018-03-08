@@ -1,18 +1,35 @@
-var $msg=$('message-content'),d,h,m,i=0;
-
+var $msg=$('.message-content'),d,h,m,i=0;
+var socket=null;
 $(window).load(function(){
-	console.log("hei");
 	$msg.mCustomScrollbar();
 	setTimeout(function(){
         fakeMessage();
 	},100)
+
+    // socket=new WebSocket("ws://172.20.71.86:8888/rest/ws/api/test");
+    // socket.onopen=function(){
+    // 	console.log("已连接!");
+    // }
+    // socket.onmessage=function(e){
+    //    console.log("get message is "+e.data);
+    // }
+    // socket.onerror=function(){
+
+    // }
+    // socket.onclose=function(){
+    // 	console.log("socket 已关闭!");
+    // }
+    socket=new Socket("ws://172.20.71.86:8888/rest/ws/api/test");
+    socket.open();
+    
 })
 
 $('.voice input').bind("keyup",function(e){
 	if(e.keyCode==13){
 		console.log("you input str is "+e.target.value);
 		var val=$.trim(e.target.value);
-		insertMessage(val);
+		//insertMessage(val);
+		socket.send(val);
 	}
 })
 function setDate(){
@@ -55,17 +72,20 @@ var Fake = [
   ':)'
 ]
 function fakeMessage(){
+	console.log("fakeMessage");
 	if($('.voice input').val()!=''){
 		return false;
 	}
-	  $('<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>').appendTo($('.mCSB_container'));
+	  $('<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>')
+	  .appendTo($('.mCSB_container'));
   updateScrollbar();
-
-  setTimeout(function() {
-    $('.message.loading').remove();
-    $('<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>').appendTo($('.mCSB_container')).addClass('new');
-    setDate();
-    updateScrollbar();
-    i++;
-  }, 1000 + (Math.random() * 20) * 100);
+ 
+  // setTimeout(function() {
+  // 	console.log("content is "+Fake[i]);
+  //   $('.message.loading').remove();
+  //   $('<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>').appendTo($('.mCSB_container')).addClass('new');
+  //   setDate();
+  //   updateScrollbar();
+  //   i++;
+  // }, 1000 + (Math.random() * 20) * 100);
 }

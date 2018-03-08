@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+      <title>chatbox</title>
+      <link rel="stylesheet" href="../dist/styles/index.min.css" />
+   </head>
+   <body>
+      <div class="pages">
+      	<div class="messages" id="msg">
+      		<ul id="list">
+
+      		</ul>
+      	</div>
+      	<div class="footer">
+           <div>
+              <input placeholder="input" />
+           </div>
+           <div>
+              <button id="submit">send</button>
+           </div>
+      	</div>
+      </div>
+      <script src="../js/rem.js"></script>
+      <script src="../js/socket.js"></script>
+      <script src="../js/chatlist.js"></script>
+      <script type="text/javascript">
+          var chatList=new ChatList();
+      </script>
+   </body>
+</html>
