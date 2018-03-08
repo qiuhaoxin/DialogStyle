@@ -20,6 +20,7 @@
     var scrollerH=0;
     var realScrollH=0;
     var $list=$('#list');
+    var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend";
     function ChatList(options){
          console.log("init chatlist");
          this.$btn=getObjById('submit');//发送按钮
@@ -31,6 +32,14 @@
          this.init();
     }
     ChatList.prototype={
+        handle:function(e){
+           var type=e.type;
+           switch(type){
+              case "":
+
+              break;
+           }
+        },
         init:function(){
             var _this=this;
             scrollerH=document.body.clientHeight - 44;
@@ -96,7 +105,7 @@
             timeDIV.innerHTML=d.getHours()+":"+d.getMinutes();
             return timeDIV;
         },
-    //显示消息到界面  type:用户问（显示在界面左边）：0  系统答(内容显示在界面右边):1  ,content:消息内容
+        //显示消息到界面  type:用户问（显示在界面左边）：0  系统答(内容显示在界面右边):1  ,content:消息内容
         insertMsg:function(type,content){
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
