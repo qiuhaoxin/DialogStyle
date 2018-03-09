@@ -19,6 +19,8 @@
     var $scroller=getObjById('msg');
     var socket=null;
     var scrollerH=0;
+
+    var mode=0;  //输入的模式 0：文字输入  1：语音输入
     var realScrollH=0,m=Math,        
         nextFrame = (function () {
             return window.requestAnimationFrame ||
@@ -38,14 +40,28 @@
                 clearTimeout;
         })();
     var transitionDuration='transitionDuration';
-    var $list=$('#list');
+
+    var $footer=getObjById('footer'),$change=getObjById('change');
+    var $voice=getObjById('voice');
     var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend",
         TRNEND_EV = 'transitionend';
     function ChatList(options){
          this.$btn=getObjById('submit');//发送按钮
          $listContainer=getObjById('list');//消息容器
          $input=document.querySelector(".footer input");
-         socket=new Socket("ws://172.20.71.86:8888/rest/ws/api/test");
+         if(message){
+            this.sendMessage(message);
+         }
+    var loc = document.location;
+    var protocolStr = loc.protocol;
+    var wsProtocl = "ws:";
+    if(protocolStr == "https:"){
+        wsProtocl = "wss:";
+    }
+  //var context="";
+  var address = wsProtocl + loc.host + context+'/ws/api/chatbot';
+//"ws://172.20.71.86:8888/rest/ws/api/test"
+         socket=new Socket(address);
 	     socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
          socket.open();
         $scroller.style['transitionDuration']="0";
@@ -97,6 +113,8 @@
              var that=this;
               that.moved = false;
               that.animating = false;
+
+              if (that.options.useTransition) that._transitionTime(0);
              
              that.distX=0;
              that.distY=0;
@@ -314,16 +332,33 @@
                 })
             }
             this.refresh();
-            $scroller.style['transition']="";
+            //$scroller.style['transition']="";
+            this.bindEvent($voice,'click',this.speak.bind(this));
+
+            //切换
+            this.bindEvent($change,'click',function(e){
+               console.log("footer class is "+$footer.classList);
+               console.log("result is "+$footer.classList.contains("change-lt"));
+               if($footer.classList.contains("change-lt")){
+                
+                   $footer.classList.remove("change-lt");
+                   $footer.classList.add("change-v");
+                   mode=1;//语音
+               }else if($footer.classList.contains('change-v')){
+                   $footer.classList.remove("change-v");
+                   $footer.classList.add("change-lt");
+                   mode=0;//文字
+               }
+            })
             this.bindEvent($scroller,TOUCH_START);
         },
         acceptMsg:function(data){
-            //data="test";
+            var data = JSON.parse(data);
             var LI=document.createElement('LI');
             LI.classList.add('msg-item');
             //<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>'
             //var inerText='<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>';
-            var inerText='<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data + '</div>'
+            var inerText='<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
             LI.innerHTML=inerText;
             $listContainer.appendChild(LI);
             this.refresh();
@@ -355,13 +390,44 @@
         clearInput:function(){
             $input.value="";
         },
-        sendMessage:function(e){
-            var inputVal=$input.value;
-             if(isEmpty(inputVal)){
-                return;
-             } 
-             this.insertMsg(0,inputVal);
-             socket.send(inputVal);
+        //接收结果后
+        speakCallBack:function(data){
+            alert(data.resultStr); 
+            this.sendMessage(data.resultStr);
+        },
+        //调用云之家语音接口
+        speak:function(callback){
+          var _this=this;
+          if(!navigator.userAgent.match(/Qing\/.*;(iOS|iPhone|Android).*/)){
+              alert("请用云之家打开!");
+              return;
+          }
+           try{
+             XuntongJSBridge.call('voiceAssistant',{
+                'recommendLabelArr':['测试数据'],
+                'recommendButtonArr':[],
+                'imageStr':''
+             },function(result){
+                 if(result['success']=='true'){
+                     _this.sendMessage(result.data.resultStr);
+                 }else{
+                    alert("error is "+result.error);
+                 }
+             })
+           }catch(e){
+              alert("speak is "+e);
+           }
+        },
+        sendMessage:function(content){
+
+            if(mode==0){//文字输入
+               content=$input.value;
+               if(isEmpty(content)){
+                  return;
+               }
+            } 
+             this.insertMsg(0,content);
+             socket.send(JSON.stringify({sessionId:chatSessionId,message:content}));
              //清空输入框
              this.clearInput();
             // this.acceptMsg();
@@ -378,11 +444,14 @@
         insertMsg:function(type,content){
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
-           var MSG=document.createElement('DIV');
-           MSG.classList.add('message');
-           MSG.classList.add('message-personal');
-           MSG.innerHTML=content;
-           LI.appendChild(MSG);
+           // var MSG=document.createElement('DIV');
+           // MSG.classList.add('message');
+           // MSG.classList.add('message-personal');
+           // MSG.innerHTML=content;
+
+           var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>'+content+'</div>'
+           //LI.appendChild(MSG);
+           LI.innerHTML=inText;
            $listContainer.appendChild(LI);
         },
         bindEvent:function(obj,eventName,callback){
