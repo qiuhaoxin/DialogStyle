@@ -9,9 +9,9 @@
    <body>
       <div class="pages">
       	<div class="messages" id="msg">
-      		<ul id="list">
+          <ul id="list">
 
-      		</ul>
+          </ul>
       	</div>
       	<div class="footer">
            <div>
@@ -27,6 +27,9 @@
       <script src="../js/jquery-3.3.1.min.js"></script>
       <script src="../js/chatlist.js"></script>
       <script type="text/javascript">
+          document.addEventListener('touchmove',function(e){
+              e.preventDefault();
+          },false)
           var chatList=new ChatList();
       </script>
    </body>
