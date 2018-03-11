@@ -1,4 +1,4 @@
-(function() {
+;(function() {
 
   if (window.XuntongJSBridge) {
     // Android加上了这个if判断，如果当前window已经定义了XuntongBridge对象，不再重新加载

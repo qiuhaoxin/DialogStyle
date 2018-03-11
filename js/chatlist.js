@@ -1,4 +1,4 @@
-(function(global,factory){
+;(function(global,factory){
     if(typeof define==='function' && define.amd){
     	define([],factory);
     }else if(typeof module!='undefined' && module.exports){
@@ -49,8 +49,8 @@
          this.$btn=getObjById('submit');//发送按钮
          $listContainer=getObjById('list');//消息容器
          $input=document.querySelector(".footer input");
-         if(message){
-            this.sendMessage(message);
+         if(window.message){
+            this.sendMessage(window.message);
          }
     var loc = document.location;
     var protocolStr = loc.protocol;
@@ -58,12 +58,12 @@
     if(protocolStr == "https:"){
         wsProtocl = "wss:";
     }
-  //var context="";
-  var address = wsProtocl + loc.host + context+'/ws/api/chatbot';
+  var address = wsProtocl + loc.host + window.context+'/ws/api/chatbot';
 //"ws://172.20.71.86:8888/rest/ws/api/test"
-         socket=new Socket(address);
-	     socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
-         socket.open();
+        console.log("address is "+address);
+        socket=new Socket(address);
+	      socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
+        socket.open();
         $scroller.style['transitionDuration']="0";
         $scroller.style['transformOrigin']="0 0";
         $scroller.style['transitionTimingFunction'] = 'cubic-bezier(0.33,0.66,0.66,1)';
@@ -339,6 +339,16 @@
             this.bindEvent($change,'click',function(e){
                console.log("footer class is "+$footer.classList);
                console.log("result is "+$footer.classList.contains("change-lt"));
+               console.log("targe class is "+e.target.classList);
+               var target=e.target;
+               if(target.classList.contains('icon-voice')){
+                  target.classList.remove('icon-voice');
+                  target.classList.add('icon-voice-text');
+               }else if(target.classList.contains('icon-voice-text')){
+                  target.classList.remove('icon-voice-text');
+                  target.classList.add('icon-voice');
+               }
+
                if($footer.classList.contains("change-lt")){
                 
                    $footer.classList.remove("change-lt");
@@ -427,7 +437,7 @@
                }
             } 
              this.insertMsg(0,content);
-             socket.send(JSON.stringify({sessionId:chatSessionId,message:content}));
+             socket.send(JSON.stringify({sessionId:window.chatSessionId,message:content}));
              //清空输入框
              this.clearInput();
             // this.acceptMsg();
@@ -444,13 +454,8 @@
         insertMsg:function(type,content){
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
-           // var MSG=document.createElement('DIV');
-           // MSG.classList.add('message');
-           // MSG.classList.add('message-personal');
-           // MSG.innerHTML=content;
 
            var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>'+content+'</div>'
-           //LI.appendChild(MSG);
            LI.innerHTML=inText;
            $listContainer.appendChild(LI);
         },

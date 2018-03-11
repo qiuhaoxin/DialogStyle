@@ -4,6 +4,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
       <title>chatbox</title>
+      <link rel="stylesheet" href="../css/style.css"/>
       <link rel="stylesheet" href="../dist/styles/index.min.css" />
    </head>
    <body>
@@ -15,32 +16,34 @@
           <div style="height:2.2rem;width:100%;"></div>
       	</div>
       	<div class="footer change-lt" id="footer">
-            <span id="change" class='change'>切换</span>
+          <!--   <span id="change" class='change'>切换</span> -->
+            <span id="change" class="change"><i class='icon icon-voice-text'></i></span>
             <div class='inputletter'>
               <input  placeholder="请输入" />
             </div>
 
-            <div class="voice" id="voice">按住说话 自动转文字</div>
+            <div class="voice" id="voice">点击说话 自动转文字</div>
       	</div>
       </div>
-    <script th:inline="JavaScript">  
+<!--     <script th:inline="JavaScript">  
     /*<![CDATA[*/  
         var context = [[${context}]];
         var chatSessionId = [[${chatSessionId}]];
         var uname = [[${uname}]];
         var message=[[${message}]];
     /*]]>*/  
-    </script> 
-      <script src="../js/rem.js"></script>
+    </script>  -->
+<!--       <script src="../js/rem.js"></script>
       <script src="../js/socket.js"></script>
       <script src="../js/jquery-3.3.1.min.js"></script>
-      <script src="../js/chatlist.js"></script>
+      <script src="../js/chatlist.js"></script> -->
+      <script src="../dist/js/index.min.js"></script>
       <script type="text/javascript">
           document.addEventListener('touchmove',function(e){
               e.preventDefault();
           },false)
           var chatList=new ChatList();
       </script>
-      <script src="../js/qingjs.js"></script>
+<!--       <script src="../js/qingjs.js"></script> -->
    </body>
 </html>

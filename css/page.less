@@ -60,14 +60,9 @@ body{
 .footer div:first-child{
 	flex-grow: 3
 }
-.footer div:last-child{
-	margin:0.5rem;
-}
 .footer input{
 	margin:0 10px;width:88%;
-	font-size:18px;
-  border:1px solid #eee;
-  border-radius:5px;
+	font-size:18px;display:inline-flex;align-items:center;height:1.6rem;
 }
 button{
 	border:1px solid #2d8cf0;
@@ -265,21 +260,25 @@ Bounce
   flex-grow:4;
   display:inline-flex;
   align-items:center;
-  height:1.4rem;
+  height:1.6rem;
   width:76%;
   font-size:15px;
-  margin:.4rem auto;
+  margin:.3rem .5rem .3rem 0px;
   border:1px solid #FFA500;
   background:#FFE4B5;
   border-radius:30px;color:#fff;justify-content:center;
 }
 .change{
-  font-size:12px;padding:5px 7px;flex-grow:1;background:#2d8cf0;
-  margin-left:7px;justify-content:center;align-items:center;color:#fff;border-radius:5px;text-align:center;
+  display:inline-flex;width:48px;
+  justify-content:center;align-items:center;border-radius:5px;text-align:center;
+  & .icon{
+    font-size:25px;
+  }
 }
 .change-lt {
    & .inputletter{
-     display:block;
+     display:inline-flex;
+     margin:0 10px 0 0;
    }
    & .voice{
       display:none;
@@ -292,10 +291,12 @@ Bounce
    & .voice{
       diplay:block
    }
+
 }
 .inputletter{
   display:inline-flex;
-
+  border:1px solid #eee;
+  border-radius:5px;
   flex-grow:4;
 }
 .right-avatar{

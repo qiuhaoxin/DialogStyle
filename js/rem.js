@@ -1,4 +1,4 @@
-(function(win,doc){
+;(function(win,doc){
    var docEl=doc.documentElement;
    var dpr=win.devicePixelRatio || 1;
    function setBodyFontSize(){
