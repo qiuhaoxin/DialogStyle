@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-      <title>chatbox</title>
+      <meta charset="utf-8" />
+      <meta name='viewport' content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+      <title>测试input</title>
       <link rel="stylesheet" href="../css/style.css"/>
       <link rel="stylesheet" href="../dist/styles/index.min.css" />
    </head>
@@ -24,31 +24,23 @@
 
             <div class="voice" id="voice">点击说话 自动转文字</div>
       	</div>
+      	<!-- 虚拟的容器 当进入页面是空白时，用户input获取焦点顶上，判断document.body.scrollTop 与 list的clientHeight 的高度-->
+      	<div class="virtual" id="virtual-box">
+           <ul id="virtualList">
+
+           </ul>
+      	</div>
       </div>
-<!--     <script th:inline="JavaScript">  
-    /*<![CDATA[*/  
-        var context = [[${context}]];
-        var chatSessionId = [[${chatSessionId}]];
-        var uname = [[${uname}]];
-        var message=[[${message}]];
-        var avatar=[[${avatar}]];//头像
-    /*]]>*/  
-    </script>  -->
-<!--       <script src="../js/rem.js"></script>
+       <script src="../js/rem.js"></script>
       <script src="../js/socket.js"></script>
-      <script src="../js/jquery-3.3.1.min.js"></script>
-      <script src="../js/chatlist.js"></script> -->
-      <script src="../dist/js/index.min.js"></script>
-      <script type="text/javascript">
+      <script src="../js/chatlist1.js"></script> 
+         <script type="text/javascript">
           document.addEventListener('touchmove',function(e){
               e.preventDefault();
           },false)
           var chatList=new ChatList();
-          //设置页面title:小K机器人
-
-          XuntongJSBridge.call('setWebViewTitle',{'title':'小K机器人'});//设置页面标题并显示
+          //设置页面title:小K机器
 
       </script>
-<!--       <script src="../js/qingjs.js"></script> -->
    </body>
 </html>

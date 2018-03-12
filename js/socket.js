@@ -18,7 +18,7 @@
         	reconnectInterval:1000,
         	maxReconnectInterval:30000,
         	reconnectDecay:1.5,
-        	timeoutInterval:2000,
+        	timeoutInterval:20000,
         	maxReconnectAttempts:null,
         	binaryType:'blob'
         }
@@ -59,6 +59,7 @@
         	evt.initCustomEvent(s, false, false, args);
         	return evt;
         };
+        this.dataArr=[];
         this.open=function(reconnectAttempt,callBack){
             ws=new WebSocket(self.url,protocols || []);
             ws.binaryType=this.binaryType;
@@ -75,14 +76,15 @@
             	console.debug("Socket");
             }
             var localWs=ws;
-            var timeout=setTimeout(function(){
-                timedOut=true;
-                localWs.close();
-                timedOut=false;
-            },self.timeoutInterval);
+            //断开连接
+            // var timeout=setTimeout(function(){
+            //     timedOut=true;
+            //     localWs.close();
+            //     timedOut=false;
+            // },self.timeoutInterval);
 
             ws.onopen=function(event){
-               clearTimeout(timeout);
+               //clearTimeout(timeout);
                if(self.debug || Socket.debugAll){
                	  console.debug("Socket","onopen",self.url);
                }
@@ -146,11 +148,11 @@
         }
 
         this.send=function(data){
-        	console.log("hei send data is "+data);
         	if(ws){
         		if(self.debug || Socket.debugAll){
         			console.debug("Socket","send",self.url,data);
         		}
+               
                return ws.send(data);
         	}else{
                 throw "INVALID_STATE_ERR: Pasuing to reconnect!"

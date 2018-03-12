@@ -45,22 +45,17 @@
     var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend",
         TRNEND_EV = 'transitionend';
 
-
+    var showVirtual=false;//是否显示虚拟的box;
+    var $virtual=getObjById('virtual-box');//虚拟wrapper
+    var $virtualList=getObjById('virtualList');
     function ChatList(options){
          var _this=this;
          this.$btn=getObjById('submit');//发送按钮
          $listContainer=getObjById('list');//消息容器
          $input=document.querySelector(".footer input");
 
-          var loc = document.location;
-          var protocolStr = loc.protocol;
-          var wsProtocl = "ws:";
-          if(protocolStr == "https:"){
-              wsProtocl = "wss:";
-          }
-        var address = wsProtocl + loc.host + window.context+'/ws/api/chatbot';
         //"ws://172.20.71.86:8888/rest/ws/api/test"
-        socket=new Socket(address);
+        socket=new Socket("ws://172.20.71.86:8888/rest/ws/api/test");
 	      socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
         socket.open(false,function(){
             if(window.message && !isEmpty(window.message)){
@@ -356,6 +351,16 @@
                         _this.sendMessage();
                      }
                 })
+                this.bindEvent($input,"focus",function(e){
+                  setTimeout(function(){
+                      // e.target.value=document.body.scrollTop;
+                      _this.shouldShowViatual();
+                  },100);
+                })
+                this.bindEvent($input,"blur",function(e){
+                  showVirtual=false;
+                  $virtual.style['visibility']="hidden";
+                })
             }
             this.refresh();
             //$scroller.style['transition']="";
@@ -387,15 +392,28 @@
 
 
         },
+        //是否应该显示虚拟框
+        shouldShowViatual:function(){
+            var boardScrollH=document.body.scrollTop;//input获取焦点页面被推上的高度
+            var containerH=$listContainer.clientHeight;
+            //$input.value="scrollis "+boardScrollH+" and listContainer "+containerH;
+            if(containerH==0 || containerH < boardScrollH){
+              showVirtual=true;
+            }
+            console.log("list height is "+$listContainer.clientHeight);
+        },
         acceptMsg:function(data){
-            var data = JSON.parse(data);
+            //var data = JSON.parse(data);
             var LI=document.createElement('LI');
             LI.classList.add('msg-item');
-            //<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>'
-            //var inerText='<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>';
-            var inerText='<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
+            var inerText='<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data + '</div>'
             LI.innerHTML=inerText;
+            var cloneNode=LI.cloneNode();
+            cloneNode.innerHTML=inerText;
             $listContainer.appendChild(LI);
+            if(showVirtual){
+              $virtualList.appendChild(cloneNode);
+            }
             this.refresh();
             this.scroll();
 
@@ -404,8 +422,8 @@
             this.caculate();
             if(realScrollH > scrollerH){
                 var scrollTop=scrollerH - realScrollH;
-                console.log("scrollTop is "+scrollTop);
                 //$listContainer.style['transform']="tranlate3d(0,"+scrollTop+"px,0)"
+                console.log("body srollTop is "+document.body.scrollTop);
                 this._pos(0,scrollTop);
             }
         },
@@ -483,7 +501,13 @@
 
            var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src="http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80" /></figure>'+content+'</div>'
            LI.innerHTML=inText;
+           var cloneNode=LI.cloneNode();
+           cloneNode.innerHTML=inText;
            $listContainer.appendChild(LI);
+           if(showVirtual){
+             $virtualList.appendChild(cloneNode);
+           }
+
         },
         bindEvent:function(obj,eventName,callback){
            obj.addEventListener(eventName,callback || this,false);
@@ -492,7 +516,6 @@
            obj.removeEventListener(eventName,callback || this,false);
         },
         _pos: function (x, y) {
-            console.log("this.hScroll is "+this.hScroll+" and vScroll is "+this.vScroll);
              x = this.hScroll ? x : 0;
              y = this.vScroll ? y : 0;
 
