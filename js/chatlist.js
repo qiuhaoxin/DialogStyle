@@ -20,7 +20,7 @@
     var socket=null;
     var scrollerH=0;
 
-    var mode=0;  //输入的模式 0：文字输入  1：语音输入
+    //var mode=0;  //输入的模式 0：文字输入  1：语音输入
     var realScrollH=0,m=Math,        
         nextFrame = (function () {
             return window.requestAnimationFrame ||
@@ -46,24 +46,32 @@
     var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend",
         TRNEND_EV = 'transitionend';
     function ChatList(options){
+         var _this=this;
          this.$btn=getObjById('submit');//发送按钮
          $listContainer=getObjById('list');//消息容器
          $input=document.querySelector(".footer input");
-         if(window.message){
+         if(window.message && !isEmpty(window.message)){
             this.sendMessage(window.message);
          }
-    var loc = document.location;
-    var protocolStr = loc.protocol;
-    var wsProtocl = "ws:";
-    if(protocolStr == "https:"){
-        wsProtocl = "wss:";
-    }
-  var address = wsProtocl + loc.host + window.context+'/ws/api/chatbot';
-//"ws://172.20.71.86:8888/rest/ws/api/test"
-        console.log("address is "+address);
+          var loc = document.location;
+          var protocolStr = loc.protocol;
+          var wsProtocl = "ws:";
+          if(protocolStr == "https:"){
+              wsProtocl = "wss:";
+          }
+        var address = wsProtocl + loc.host + window.context+'/ws/api/chatbot';
+        //"ws://172.20.71.86:8888/rest/ws/api/test"
         socket=new Socket(address);
 	      socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
-        socket.open();
+        socket.open(false,function(){
+           _this.mode=1;
+           _this.sendMessage(window.message);
+           _this.mode=0;
+        });
+        //从别的应用进入该页面，如有message则发送message消息
+        // if(window.message){
+        //   this.sendMessage(window.message);
+        // }
         $scroller.style['transitionDuration']="0";
         $scroller.style['transformOrigin']="0 0";
         $scroller.style['transitionTimingFunction'] = 'cubic-bezier(0.33,0.66,0.66,1)';
@@ -72,6 +80,7 @@
     ChatList.prototype={
         x:0,
         y:0,
+        mode:0,//输入的模式 0：文字输入  1：语音输入
         options:{
             useTransform:true,
             bounce:true,
@@ -353,11 +362,11 @@
                 
                    $footer.classList.remove("change-lt");
                    $footer.classList.add("change-v");
-                   mode=1;//语音
+                   this.mode=1;//语音
                }else if($footer.classList.contains('change-v')){
                    $footer.classList.remove("change-v");
                    $footer.classList.add("change-lt");
-                   mode=0;//文字
+                   this.mode=0;//文字
                }
             })
             this.bindEvent($scroller,TOUCH_START);
@@ -430,7 +439,7 @@
         },
         sendMessage:function(content){
 
-            if(mode==0){//文字输入
+            if(this.mode==0){//文字输入
                content=$input.value;
                if(isEmpty(content)){
                   return;

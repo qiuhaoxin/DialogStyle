@@ -10,7 +10,7 @@
 })(this,function(){
 	if(!'WebSocket' in window){
 		return;
-	}
+	} 
 	function Socket(url,protocols,options){
         var defaultSetting={
         	debug:false,
@@ -59,7 +59,7 @@
         	evt.initCustomEvent(s, false, false, args);
         	return evt;
         };
-        this.open=function(reconnectAttempt){
+        this.open=function(reconnectAttempt,callBack){
             ws=new WebSocket(self.url,protocols || []);
             ws.binaryType=this.binaryType;
             if(reconnectAttempt){
@@ -91,7 +91,10 @@
                self.reconnectAttempts=0;
                var e=generateEvent('open');
                e.isReconnect=false;
-               eventTarget.dispatchEvent(e)
+               eventTarget.dispatchEvent(e);
+               if(callBack){
+                  callBack();
+               }
             }
             ws.onclose = function(event) {
                 clearTimeout(timeout);
