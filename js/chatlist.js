@@ -411,9 +411,15 @@
             var data = JSON.parse(data);
             var LI=document.createElement('LI');
             LI.classList.add('msg-item');
+            var urlText="";
+            if(data.type=='URL'){
+               var urlContent=data.url;
+               urlText="<div class='url-wrapper'><a href='"+urlContent.url+"'><span class='url-title'>"+urlContent.title+"</span><span class='url-content'>"
+               +urlContent.content+"</span></a></div>"
+            }
             //<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>'
             //var inerText='<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>';
-            var inerText='<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
+            var inerText=urlText + '<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
             LI.innerHTML=inerText;
             var cloneNode=LI.cloneNode();
             cloneNode.innerHTML=inerText;
