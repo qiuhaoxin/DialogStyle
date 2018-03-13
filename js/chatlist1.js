@@ -354,7 +354,7 @@
                 this.bindEvent($input,"focus",function(e){
                   setTimeout(function(){
                       // e.target.value=document.body.scrollTop;
-                      _this.shouldShowViatual();
+                      _this.shouldShowVirtual();
                   },100);
                 })
                 this.bindEvent($input,"blur",function(e){
@@ -393,7 +393,7 @@
 
         },
         //是否应该显示虚拟框
-        shouldShowViatual:function(){
+        shouldShowVirtual:function(){
             var boardScrollH=document.body.scrollTop;//input获取焦点页面被推上的高度
             var containerH=$listContainer.clientHeight;
             //$input.value="scrollis "+boardScrollH+" and listContainer "+containerH;

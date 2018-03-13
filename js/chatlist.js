@@ -45,7 +45,9 @@
     var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend",
         TRNEND_EV = 'transitionend';
 
-
+    var showVirtual=false;//是否显示虚拟的box;
+    var $virtual=getObjById('virtual-box');//虚拟wrapper
+    var $virtualList=getObjById('virtualList');
     function ChatList(options){
          var _this=this;
          this.$btn=getObjById('submit');//发送按钮
@@ -65,6 +67,7 @@
         socket.open(false,function(){
             if(window.message && !isEmpty(window.message)){
                _this.mode=1; 
+               _this.shouldShowVirtual();
                _this.sendMessage(window.message);
                _this.mode=0;
            }
@@ -342,8 +345,8 @@
             scrollerH=this.wrapperH=document.body.clientHeight - 44;
             this.wrapperW=document.body.clientWidth;
             var imgArr=[
-                'http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80',
-                'https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg'
+                window.avatar ||'http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80',
+                'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
                 ]
             this.loadImg(imgArr);
             if(this.$btn){
@@ -356,11 +359,18 @@
                         _this.sendMessage();
                      }
                 })
+                this.bindEvent($input,"focus",function(e){
+                  setTimeout(function(){
+                      _this.shouldShowVirtual();
+                  },100);
+                })
+                this.bindEvent($input,"blur",function(e){
+                  showVirtual=false;
+                  $virtual.style['visibility']="hidden";
+                })
             }
             this.refresh();
-            //$scroller.style['transition']="";
             this.bindEvent($voice,'click',this.speak.bind(this));
-
             //切换
             this.bindEvent($change,'click',function(e){
                var target=e.target;
@@ -384,8 +394,18 @@
                }
             })
             this.bindEvent($scroller,TOUCH_START);
-
-
+        },
+        //是否应该显示虚拟框
+        shouldShowVirtual:function(){
+            var boardScrollH=document.body.scrollTop;//input获取焦点页面被推上的高度
+            var containerH=$listContainer.clientHeight;
+            //$input.value="scrollis "+boardScrollH+" and listContainer "+containerH;
+            if(containerH==0 || (parseInt(containerH) + 30) < boardScrollH){
+              if($input==document.activeElement){
+                 showVirtual=true;
+                 $virtual.style['visibility']="visible";
+              }
+            }
         },
         acceptMsg:function(data){
             var data = JSON.parse(data);
@@ -395,10 +415,15 @@
             //var inerText='<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>';
             var inerText='<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
             LI.innerHTML=inerText;
+            var cloneNode=LI.cloneNode();
+            cloneNode.innerHTML=inerText;
             $listContainer.appendChild(LI);
+            if(showVirtual || !isEmpty(window.message)){
+              $virtualList.appendChild(cloneNode);
+              window.message="";
+            }
             this.refresh();
             this.scroll();
-
         },
         scroll:function(){
             this.caculate();
@@ -454,7 +479,6 @@
            }
         },
         sendMessage:function(content){
-
             if(this.mode==0){//文字输入
                content=$input.value;
                if(isEmpty(content)){
@@ -465,7 +489,6 @@
              socket.send(JSON.stringify({sessionId:window.chatSessionId,message:content}));
              //清空输入框
              this.clearInput();
-            // this.acceptMsg();
              this.refresh();
              this.scroll();
         },
@@ -480,10 +503,15 @@
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
            //https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg
-
            var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src="http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80" /></figure>'+content+'</div>'
            LI.innerHTML=inText;
+           var cloneNode=LI.cloneNode();
+           cloneNode.innerHTML=inText;
            $listContainer.appendChild(LI);
+           if(showVirtual || !isEmpty(window.message)){
+             $virtualList.appendChild(cloneNode);
+           }
+
         },
         bindEvent:function(obj,eventName,callback){
            obj.addEventListener(eventName,callback || this,false);
@@ -527,10 +555,8 @@
                 speed = speed * maxDistLower / newDist;
                 newDist = maxDistLower;
             }
-
             newDist = newDist * (dist < 0 ? -1 : 1);
             newTime = speed / deceleration;
-
             return { dist: newDist, time: Math.round(newTime) };
         },
     }
