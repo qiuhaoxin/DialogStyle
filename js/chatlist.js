@@ -1,4 +1,4 @@
-;(function(global,factory){
+﻿;(function(global,factory){
     if(typeof define==='function' && define.amd){
     	define([],factory);
     }else if(typeof module!='undefined' && module.exports){
@@ -48,6 +48,10 @@
     var showVirtual=false;//是否显示虚拟的box;
     var $virtual=getObjById('virtual-box');//虚拟wrapper
     var $virtualList=getObjById('virtualList');
+
+     var winWidth=window.innerWidth;
+     var winHeight=window.innerHeight;
+     var $show=getObjById('show');
     function ChatList(options){
          var _this=this;
          this.$btn=getObjById('submit');//发送按钮
@@ -80,7 +84,9 @@
     ChatList.prototype={
         x:0,
         y:0,
-        mode:0,//输入的模式 0：文字输入  1：语音输入
+        mode:0,//输入的模式 0：文字输入  1：语音输入,
+        imgArr:null,
+        html:"",
         options:{
             useTransform:true,
             bounce:true,
@@ -139,6 +145,8 @@
              that.startTime=e.timeStamp || Date.now();
              this.bindEvent($scroller,TOUCH_MOVE);
              this.bindEvent($scroller,TOUCH_END);
+             //页面滚动时input失去焦点
+             $input.blur();
         },
         move:function(e){
              var that=this;
@@ -342,17 +350,37 @@
         },
         init:function(){
             var _this=this;
+            // this.html=localStorage.getItem('htmlContent');
+            // if(!isEmpty(this.html)){
+            //   $listContainer.innerHTML=this.html;
+            //   localStorage.setItem('htmlContent','');
+            //   this.jump();
+            // }
+
+            // XuntongJSBridge.call('defback', {}, function () {
+            //     if (history.length <= 1) { //顶级页面，则关闭当前Web
+            //             localStorage.setItem('htmlContent','');
+            //             XuntongJSBridge.call('closeWebView');
+                
+            //         } else {
+            //             localStorage.setItem('htmlContent','');
+            //             history.back();
+            //         }
+               
+            // })
+
             scrollerH=this.wrapperH=document.body.clientHeight - 44;
             this.wrapperW=document.body.clientWidth;
-            var imgArr=[
-                window.avatar ||'http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80',
-                'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'
-                ]
-            this.loadImg(imgArr);
+            this.imgArr=[
+                window.avatar || 'http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80',
+                '../static/chatbot/server.png'
+            ]
+            this.loadImg(this.imgArr);
             if(this.$btn){
                 this.bindEvent(this.$btn,'click',this.sendMessage.bind(this))
             }
             if($input){
+                var bfscrolltop;
                 this.bindEvent($input,"keyup",function(e){
                      e.preventDefault();
                      if(e.keyCode==13){
@@ -361,10 +389,36 @@
                 })
                 this.bindEvent($input,"focus",function(e){
                   setTimeout(function(){
+                       _this.inputIsNotInView =_this.solutionThree();
+                      $input.value=$input.value +" "+_this.inputIsNotInView;
+                      if (_this.inputIsNotInView) {
+                            // Width, Height: 分别是键盘没有弹出时window.innerWidth和window.innerHeight
+                            // 88: 是第三方输入法比原生输入法多的那个tool bar(输入时显示带选项) 的高度, 做的不是太绝, 高度是统一的
+                            // ios第三方输入法的tool bar 甚至 键盘也被当作可视区域了(包含在键盘弹出时的window.innerHeight)
+                          if (winWidth != 750) {
+                              var bottomAdjust = (winHeight - window.innerHeight - 88) + 'px'
+                             // $(this.inputBoxContainer).css('bottom', bottomAdjust)
+                             $show.innerHTML="first "+bottomAdjust;
+                             $footer.style['bottom']=bottomAdjust;
+                          }
+                          else {
+                                // 'iphone 6 6s, 需要额外减去键盘高度432(见下图), 还算有良心, 高度和原生保持一致')
+                              var bottomAdjust = (winHeight - window.innerHeight - 88 - 432) + 'px'
+                              //$(this.inputBoxContainer).css('bottom', bottomAdjust)
+                              $show.innerHTML="next "+bottomAdjust;
+                              $footer.style['bottom']=bottomAdjust;
+                          }
+                      }
+                      // _this.scrollIntoViewWhenFocus();
+                      //解决第三方软键盘唤起时底部input输入框被遮挡问题
+                      //_this.solutionOne();
+                      //_this.solutionTwo();
                       _this.shouldShowVirtual();
-                  },100);
+                  },300);
                 })
                 this.bindEvent($input,"blur",function(e){
+                  clearInterval(_this.timer);//清除计时器
+                  //document.body.scrollTop = bfscrolltop;//将软键盘唤起前的浏览器滚动部分高度重新赋给改变后的高度
                   showVirtual=false;
                   $virtual.style['visibility']="hidden";
                 })
@@ -394,13 +448,14 @@
                }
             })
             this.bindEvent($scroller,TOUCH_START);
+
         },
         //是否应该显示虚拟框
         shouldShowVirtual:function(){
             var boardScrollH=document.body.scrollTop;//input获取焦点页面被推上的高度
             var containerH=$listContainer.clientHeight;
             //$input.value="scrollis "+boardScrollH+" and listContainer "+containerH;
-            if(containerH==0 || (parseInt(containerH) + 30) < boardScrollH){
+            if((parseInt(containerH) + 30) < boardScrollH){
               if($input==document.activeElement){
                  showVirtual=true;
                  $virtual.style['visibility']="visible";
@@ -414,12 +469,10 @@
             var urlText="";
             if(data.type=='URL'){
                var urlContent=data.url;
-               urlText="<div class='url-wrapper'><a href='"+urlContent.url+"'><span class='url-title'>"+urlContent.title+"</span><span class='url-content'>"
-               +urlContent.content+"</span></a></div>"
+               urlText="<div class='url-wrapper' data-url="+urlContent.url+"><span class='url-title'>"+urlContent.title+"</span><span class='url-content'>"
+               +urlContent.content+"</span></div>"
             }
-            //<div class="message new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + Fake[i] + '</div>'
-            //var inerText='<div class="message loading new"><figure class="avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure><span></span></div>';
-            var inerText=urlText + '<div class="message new"><figure class="avatar left-avatar"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg" /></figure>' + data.text + '</div>'
+            var inerText=urlText + '<div class="message new"><figure class="avatar left-avatar"><img src='+this.imgArr[1]+'  /></figure>' + data.text + '</div>'
             LI.innerHTML=inerText;
             var cloneNode=LI.cloneNode();
             cloneNode.innerHTML=inerText;
@@ -428,14 +481,35 @@
               $virtualList.appendChild(cloneNode);
               window.message="";
             }
+            this.jump();
             this.refresh();
             this.scroll();
+            this.html+="<li class='msg-item'>"+inerText+"</li>"
+        },
+        //页面内点击跳转
+        jump:function(){
+          var _this=this;
+           var urlWrapper=document.querySelectorAll(".url-wrapper");
+           console.log("length is "+urlWrapper.length);
+           for(var i=0,len=urlWrapper.length;i<len;i++){
+               this.bindEvent(urlWrapper[i],'click',function(e){
+                   var target=e.target;
+                   console.log("node name is "+target.nodeName);
+                   if(target.nodeName!='DIV'){
+                     target=target.parentNode;
+                   }
+                   var url=target.getAttribute('data-url');
+                   if(url){
+                     // localStorage.setItem("htmlContent",_this.html);
+                      location.href=url;
+                   }
+               })
+           }
         },
         scroll:function(){
             this.caculate();
             if(realScrollH > scrollerH){
                 var scrollTop=scrollerH - realScrollH;
-                console.log("scrollTop is "+scrollTop);
                 //$listContainer.style['transform']="tranlate3d(0,"+scrollTop+"px,0)"
                 this._pos(0,scrollTop);
             }
@@ -468,20 +542,33 @@
               alert("请用云之家打开!");
               return;
           }
+           // try{
+           //  //voiceRecognize   
+           //   XuntongJSBridge.call('voiceAssistant',{
+           //      'recommendLabelArr':['测试数据'],
+           //      'recommendButtonArr':[],
+           //      'imageStr':''
+           //   },function(result){
+           //       if(result['success']=='true'){
+           //           _this.sendMessage(result.data.resultStr);
+           //       }else{
+           //          alert("error is "+result.error);
+           //       }
+           //   })
+           // }catch(e){
+           //    alert("speak is "+e);
+           // }
            try{
-             XuntongJSBridge.call('voiceAssistant',{
-                'recommendLabelArr':['测试数据'],
-                'recommendButtonArr':[],
-                'imageStr':''
-             },function(result){
-                 if(result['success']=='true'){
-                     _this.sendMessage(result.data.resultStr);
-                 }else{
-                    alert("error is "+result.error);
-                 }
-             })
+                 XuntongJSBridge.call('voiceRecognize',{
+
+                 },function(result){
+                     alert("result is "+JSON.stringify(result));
+                     if(result['success']=='true'){
+                         _this.sendMessage(result.data.text);
+                     }
+                 })
            }catch(e){
-              alert("speak is "+e);
+
            }
         },
         sendMessage:function(content){
@@ -509,7 +596,7 @@
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
            //https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg
-           var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src="http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80" /></figure>'+content+'</div>'
+           var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src='+this.imgArr[0]+' /></figure>'+content+'</div>'
            LI.innerHTML=inText;
            var cloneNode=LI.cloneNode();
            cloneNode.innerHTML=inText;
@@ -517,7 +604,7 @@
            if(showVirtual || !isEmpty(window.message)){
              $virtualList.appendChild(cloneNode);
            }
-
+           this.html+="<li class='msg-item'>"+inText+"</li>";
         },
         bindEvent:function(obj,eventName,callback){
            obj.addEventListener(eventName,callback || this,false);
@@ -565,6 +652,117 @@
             newTime = speed / deceleration;
             return { dist: newDist, time: Math.round(newTime) };
         },
+        notInView:function(){
+          var bottom=$footer.getBoundingClientRect().bottom;
+          $input.value=bottom +" "+window.innerHeight+" and winHeight";
+          if(window.innerHeight - bottom <= 0){
+             return true;
+          }
+          return false;
+        },
+        //解决iOS 11键盘遮挡输入框的BUG
+        solutionOne:function(){
+            var str = navigator.userAgent.toLowerCase();
+            var ver = str.match(/cpu iphone os (.*?) like mac os/)[1].replace(/_/g,".");
+            var oc = ver.split('.')[0];
+            $input.value=oc;
+            if(oc > 10){
+                // ios11 不做处理
+                     this.timer = setInterval(function() {
+                    $input.value='输入框获取到焦点';
+                    document.body.scrollTop = document.body.scrollHeight;
+                }, 100);
+               // return true;
+            }else{
+                this.timer = setInterval(function() {
+                    $input.value='输入框获取到焦点';
+                    document.body.scrollTop = document.body.scrollHeight;
+                }, 100);
+            }
+        },
+        solutionTwo:function(){
+            //if(/Android/.test(navigator.appVersion)) {
+               if(document.activeElement.scrollIntoViewIfNeeded){
+                   $input.value="support!"
+                   $footer.scrollIntoViewIfNeeded();
+               }
+               //ios不会触发resize事件
+               // window.addEventListener("resize", function() {
+               //      if(document.activeElement.tagName=="INPUT" || document.activeElement.tagName=="TEXTAREA") {
+               //           window.setTimeout(function() {
+               //               document.activeElement.scrollIntoViewIfNeeded && document.activeElement.scrollIntoViewIfNeeded();
+               //           },0);
+               //       }
+               //   })
+           // }
+        },
+        solutionThree:function(){
+            // getBoundingClientRect 是获取定位的，很怪异, (iphone 6s 10.0 bate版表现特殊)
+            // top: 元素顶部到窗口（可是区域）顶部
+            // bottom: 元素底部到窗口顶部
+            // left: 元素左侧到窗口左侧
+            // right: 元素右侧到窗口左侧
+            // width/height 元素宽高
+               $input.value=JSON.stringify($footer.getBoundingClientRect());
+               var bottom = $footer.getBoundingClientRect().bottom
+              // $input.value=bottom;
+               // 可视区域高度 - 元素底部到窗口顶部的高度 < 0, 则说明被键盘挡住了
+            if (window.innerHeight - bottom < 0) {
+                $input.value="挡住了";
+                return true
+            }
+            return false
+        }
     }
     return ChatList;
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // //通过scrollIntoViewIfNeeded来将不在可视区域内的元素滚动至可视区域，如在可视区域则不滚动
+        // solutionTwo:function(){
+        //     //if(/Android/.test(navigator.appVersion)) {
+        //        if(document.activeElement.scrollIntoViewIfNeeded){
+        //            $input.value="support!"
+        //            $footer.scrollIntoViewIfNeeded();
+        //        }
+        //        //ios不会触发resize事件
+        //        window.addEventListener("resize", function() {
+        //             if(document.activeElement.tagName=="INPUT" || document.activeElement.tagName=="TEXTAREA") {
+        //                  window.setTimeout(function() {
+        //                      document.activeElement.scrollIntoViewIfNeeded && document.activeElement.scrollIntoViewIfNeeded();
+        //                  },0);
+        //              }
+        //          })
+        //    // }
+        // },
+        // //
+        // solutionThree:function(){
+        //     // getBoundingClientRect 是获取定位的，很怪异, (iphone 6s 10.0 bate版表现特殊)
+        //     // top: 元素顶部到窗口（可是区域）顶部
+        //     // bottom: 元素底部到窗口顶部
+        //     // left: 元素左侧到窗口左侧
+        //     // right: 元素右侧到窗口左侧
+        //     // width/height 元素宽高
+        //        $input.value=JSON.stringify($footer.getBoundingClientRect())
+        //        let bottom = $footer.getBoundingClientRect().bottom
+        //       // $input.value=bottom;
+        //        // 可视区域高度 - 元素底部到窗口顶部的高度 < 0, 则说明被键盘挡住了
+        //     if (window.innerHeight - bottom < 0) {
+        //         $input.value="挡住了";
+        //         return true
+        //     }
+        //     return false
+        // }
