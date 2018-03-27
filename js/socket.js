@@ -19,8 +19,9 @@
         	maxReconnectInterval:30000,
         	reconnectDecay:1.5,
         	timeoutInterval:20000,
-        	maxReconnectAttempts:null,
-        	binaryType:'blob'
+        	maxReconnectAttempts:100,
+        	binaryType:'blob',
+            domObj:null
         }
         if(!options){
         	options={}
@@ -45,7 +46,7 @@
 
         eventTarget.addEventListener('open',function(e){self.onopen(e)});
         eventTarget.addEventListener('close',function(e){self.onclose(e)});
-        eventTarget.addEventListener('message',function(e){console.log("onmessage"); self.onmessage(e)});
+        eventTarget.addEventListener('message',function(e){window.scoketTip.innerText="已连接服务器"+self.url;console.log("onmessage"); self.onmessage(e)});
         eventTarget.addEventListener('error',function(e){self.onerror(e)});
         eventTarget.addEventListener('connecting',function(e){self.onconnecting(e)});
 
@@ -62,6 +63,7 @@
         this.dataArr=[];
         this.open=function(reconnectAttempt,callBack){
             ws=new WebSocket(self.url,protocols || []);
+
             ws.binaryType=this.binaryType;
             if(reconnectAttempt){
                 if(this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts){
@@ -84,6 +86,8 @@
             // },self.timeoutInterval);
 
             ws.onopen=function(event){
+               window.scoketTip.innerText="已连接服务器"+self.url;
+               console.log("url is "+self.url);
                //clearTimeout(timeout);
                if(self.debug || Socket.debugAll){
                	  console.debug("Socket","onopen",self.url);
@@ -99,7 +103,9 @@
                }
             }
             ws.onclose = function(event) {
-                clearTimeout(timeout);
+                window.scoketTip.innerText="已关闭服务器链接";
+               // clearTimeout(timeout);
+                //alert("webSocket close !")
                 ws = null;
                 if (forcedClose) {
                     self.readyState = WebSocket.CLOSED;
@@ -125,7 +131,8 @@
                     }, timeout > self.maxReconnectInterval ? self.maxReconnectInterval : timeout);
                 }
             };
-            ws.onmessage = function(event) {
+            ws.onmessage = function(event) { 
+                window.scoketTip.innerText="消息"+JSON.stringify(event.data);
                 if (self.debug || Socket.debugAll) {
                     console.debug('Socket', 'onmessage', self.url, event.data);
                 }
@@ -135,6 +142,7 @@
                 eventTarget.dispatchEvent(e);
             };
             ws.onerror = function(event) {
+                window.scoketTip.innerText="服务器错误";
                 if (self.debug || Socket.debugAll) {
                     console.debug('Socket', 'onerror', self.url, event);
                 }

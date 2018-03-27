@@ -13,7 +13,7 @@
     function isEmpty(str){
     	var empty=/^\s*$/;
     	return empty.test(str);
-    }
+    $}
     var $input=null;
     var $listContainer=null;
     var $scroller=getObjById('msg');
@@ -40,7 +40,7 @@
         })();
     var transitionDuration='transitionDuration';
 
-    var $footer=getObjById('footer'),$change=getObjById('change');
+    var $footer=getObjById('footer'),$change=getObjById('change'),$changeVoice=getObjById('changeVoice');
     var $voice=getObjById('voice');
     var TOUCH_START="touchstart",TOUCH_MOVE="touchmove",TOUCH_END="touchend",
         TRNEND_EV = 'transitionend';
@@ -48,7 +48,8 @@
     var showVirtual=false;//是否显示虚拟的box;
     var $virtual=getObjById('virtual-box');//虚拟wrapper
     var $virtualList=getObjById('virtualList');
-
+    var $scoketTip=getObjById('socket_tip');//用来提示websocket的状态
+    window.scoketTip=$scoketTip;
      var winWidth=window.innerWidth;
      var winHeight=window.innerHeight;
      var $show=getObjById('show');
@@ -66,14 +67,25 @@
           }
         var address = wsProtocl + loc.host + window.context+'/ws/api/chatbot';
         //"ws://172.20.71.86:8888/rest/ws/api/test"
-        socket=new Socket(address);
+        window.message="明天从深圳到北京出差后天返回";
+        //alert("window.mesage is "+window.message);
+        var options={
+          domObj:$scoketTip
+        }
+        socket=new Socket(address,'',options);
 	      socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
         socket.open(false,function(){
             if(window.message && !isEmpty(window.message)){
-               _this.mode=1; 
-               _this.shouldShowVirtual();
-               _this.sendMessage(window.message);
-               _this.mode=0;
+               var chatSessionId=localStorage.getItem('chatSessionId');
+               console.log("chatSessionId is "+chatSessionId);
+               //if(chatSessionId || !isEmpty(chatSessionId)){
+                  
+               //}else{
+                   _this.mode=1; 
+                   _this.shouldShowVirtual();
+                   _this.sendMessage(window.message);
+                   _this.mode=0;
+               //}
            }
         });
         $scroller.style['transitionDuration']="0";
@@ -87,6 +99,10 @@
         mode:0,//输入的模式 0：文字输入  1：语音输入,
         imgArr:null,
         html:"",
+        urlText:'',
+        localId:0,//云之家语音播报
+        voiceText:'',//云之家语音播报
+        bindEvents:[],//事件列表，主要放已经绑定事件的对象 {'obj':obj,eventName:'click',callBack:fn}
         options:{
             useTransform:true,
             bounce:true,
@@ -173,7 +189,6 @@
                   deltaY=0;
               }
               this.moved=true;
-              console.log("move"+newX+" and nweY is "+newY);
               this._pos(newX,newY);
               this.dirX=deltaX > 0 ? -1 : deltaX < 0 ? 1 : 0;
               this.dirY=deltaY > 0 ? 1 : deltaY < 0 ? 1 : 0;
@@ -286,7 +301,6 @@
 
             if (that.options.useTransition) {
                 that._transitionTime(step.time);
-                console.log('_startAni');
                 that._pos(step.x, step.y);
                 that.animating = false;
                 if (step.time) that.bindEvent($scroller,TRNEND_EV);
@@ -299,7 +313,6 @@
                     newX, newY;
 
                 if (now >= startTime + step.time) {
-                    console.log("_startAni animate");
                     that._pos(step.x, step.y);
                     that.animating = false;
                     if (that.options.onAnimationEnd) that.options.onAnimationEnd.call(that);            // Execute custom code on animation end
@@ -311,9 +324,7 @@
                 easeOut = m.sqrt(1 - now * now);
                 newX = (step.x - startX) * easeOut + startX;
                 newY = (step.y - startY) * easeOut + startY;
-                console.log("_startAni animate2");
                 that._pos(newX, newY);
-                console.log("animating is "+that.animating);
                 if (that.animating) that.aniTime = nextFrame(animate);
             };
 
@@ -321,10 +332,7 @@
         },
         _transitionTime: function (time) {
             time += 'ms';
-            console.log("time is "+time);
             $scroller.style['transitionDuration'] = time;
-            // if (this.hScrollbar) this.hScrollbarIndicator.style[transitionDuration] = time;
-            // if (this.vScrollbar) this.vScrollbarIndicator.style[transitionDuration] = time;
         },
         loadImg:function(srcArr){
           srcArr.forEach(function(item){
@@ -350,24 +358,32 @@
         },
         init:function(){
             var _this=this;
-            // this.html=localStorage.getItem('htmlContent');
-            // if(!isEmpty(this.html)){
-            //   $listContainer.innerHTML=this.html;
-            //   localStorage.setItem('htmlContent','');
-            //   this.jump();
-            // }
+            this.html=localStorage.getItem('htmlContent');
+            var chatSessionId=localStorage.getItem('chatSessionId');
+            if(chatSessionId && !isEmpty(chatSessionId) && chatSessionId!='0'){
+                window.chatSessionId=localStorage.getItem('chatSessionId');
+                localStorage.removeItem('chatSessionId');
+            }
+            if(!isEmpty(this.html)){
+              $listContainer.innerHTML=this.html;
+              localStorage.setItem('htmlContent','');
+              localStorage.removeItem('chatSessionId');
+              this.jump();
+            }
 
-            // XuntongJSBridge.call('defback', {}, function () {
-            //     if (history.length <= 1) { //顶级页面，则关闭当前Web
-            //             localStorage.setItem('htmlContent','');
-            //             XuntongJSBridge.call('closeWebView');
+            XuntongJSBridge.call('defback', {}, function () {
+                //if (history.length <= 1) { //顶级页面，则关闭当前Web
+                        localStorage.setItem('htmlContent','');
+                        localStorage.removeItem('chatSessionId');
+                        XuntongJSBridge.call('closeWebView');
                 
-            //         } else {
-            //             localStorage.setItem('htmlContent','');
-            //             history.back();
-            //         }
+                   // } else {
+                       // localStorage.removeItem('chatSessionId');
+                      //  localStorage.setItem('htmlContent','');
+                      //  history.back();
+                   // }
                
-            // })
+            })
 
             scrollerH=this.wrapperH=document.body.clientHeight - 44;
             this.wrapperW=document.body.clientWidth;
@@ -375,7 +391,7 @@
                 window.avatar || 'http://static.yunzhijia.com/space/c/photo/load?id=58a69bede4b06875aef77505&spec=80',
                 '../static/chatbot/server.png'
             ]
-            this.loadImg(this.imgArr);
+           // this.loadImg(this.imgArr);
             if(this.$btn){
                 this.bindEvent(this.$btn,'click',this.sendMessage.bind(this))
             }
@@ -389,30 +405,6 @@
                 })
                 this.bindEvent($input,"focus",function(e){
                   setTimeout(function(){
-                       _this.inputIsNotInView =_this.solutionThree();
-                      $input.value=$input.value +" "+_this.inputIsNotInView;
-                      if (_this.inputIsNotInView) {
-                            // Width, Height: 分别是键盘没有弹出时window.innerWidth和window.innerHeight
-                            // 88: 是第三方输入法比原生输入法多的那个tool bar(输入时显示带选项) 的高度, 做的不是太绝, 高度是统一的
-                            // ios第三方输入法的tool bar 甚至 键盘也被当作可视区域了(包含在键盘弹出时的window.innerHeight)
-                          if (winWidth != 750) {
-                              var bottomAdjust = (winHeight - window.innerHeight - 88) + 'px'
-                             // $(this.inputBoxContainer).css('bottom', bottomAdjust)
-                             $show.innerHTML="first "+bottomAdjust;
-                             $footer.style['bottom']=bottomAdjust;
-                          }
-                          else {
-                                // 'iphone 6 6s, 需要额外减去键盘高度432(见下图), 还算有良心, 高度和原生保持一致')
-                              var bottomAdjust = (winHeight - window.innerHeight - 88 - 432) + 'px'
-                              //$(this.inputBoxContainer).css('bottom', bottomAdjust)
-                              $show.innerHTML="next "+bottomAdjust;
-                              $footer.style['bottom']=bottomAdjust;
-                          }
-                      }
-                      // _this.scrollIntoViewWhenFocus();
-                      //解决第三方软键盘唤起时底部input输入框被遮挡问题
-                      //_this.solutionOne();
-                      //_this.solutionTwo();
                       _this.shouldShowVirtual();
                   },300);
                 })
@@ -447,6 +439,27 @@
                    this.mode=0;//文字
                }
             })
+            this.bindEvent($changeVoice,'click',function(e){
+              var target=e.target;
+               if(target.classList.contains('icon-voice')){
+                  target.classList.remove('icon-voice');
+                  target.classList.add('icon-voice-text');
+               }else if(target.classList.contains('icon-voice-text')){
+                  target.classList.remove('icon-voice-text');
+                  target.classList.add('icon-voice');
+               }
+
+               if($footer.classList.contains("change-lt")){
+                
+                   $footer.classList.remove("change-lt");
+                   $footer.classList.add("change-v");
+                   this.mode=1;//语音
+               }else if($footer.classList.contains('change-v')){
+                   $footer.classList.remove("change-v");
+                   $footer.classList.add("change-lt");
+                   this.mode=0;//文字
+               }
+            })
             this.bindEvent($scroller,TOUCH_START);
 
         },
@@ -457,59 +470,214 @@
             //$input.value="scrollis "+boardScrollH+" and listContainer "+containerH;
             if((parseInt(containerH) + 30) < boardScrollH){
               if($input==document.activeElement){
-                 showVirtual=true;
+                 //showVirtual=true;
                  $virtual.style['visibility']="visible";
               }
             }
         },
         acceptMsg:function(data){
+            console.log("data is "+data)
             var data = JSON.parse(data);
+
             var LI=document.createElement('LI');
             LI.classList.add('msg-item');
-            var urlText="";
-            if(data.type=='URL'){
-               var urlContent=data.url;
-               urlText="<div class='url-wrapper' data-url="+urlContent.url+"><span class='url-title'>"+urlContent.title+"</span><span class='url-content'>"
-               +urlContent.content+"</span></div>"
-            }
-            var inerText=urlText + '<div class="message new"><figure class="avatar left-avatar"><img src='+this.imgArr[1]+'  /></figure>' + data.text + '</div>'
-            LI.innerHTML=inerText;
+            //var urlText="";
+            //this.urlText=
+            this.dealType(data);
+            //<figure class="avatar left-avatar"><img src='+this.imgArr[1]+'  /></figure>
+            //var inerText=urlText + '<div class="message new">' + data.text + '</div>'
+            LI.innerHTML=this.urlText;//inerText;
             var cloneNode=LI.cloneNode();
-            cloneNode.innerHTML=inerText;
+            cloneNode.innerHTML=this.urlText;//inerText;
             $listContainer.appendChild(LI);
             if(showVirtual || !isEmpty(window.message)){
               $virtualList.appendChild(cloneNode);
               window.message="";
             }
-            this.jump();
+            if(data.type.toUpperCase()!='TEXT'){
+               this.jump();
+            }
             this.refresh();
             this.scroll();
-            this.html+="<li class='msg-item'>"+inerText+"</li>"
+            this.html+="<li class='msg-item'>"+this.urlText+"</li>";
+            if(!isEmpty(this.voiceText)){
+               this.playVoice(this.voiceText);
+            }
+            this.urlText="";
+        },
+        playVoice:function(msgContent){
+            var _this=this;
+            try{
+              XuntongJSBridge.call('voiceSynthesize',{
+                'text':msgContent,
+                'voiceName':'xiaoyan'
+              },function(result){
+                   if (result.success == true || result.success == 'true') {
+                        _this.localId = result.data.localId;
+                        var len = result.data.len;
+                        XuntongJSBridge.call('playVoice', { localId:_this.localId},
+                          function(result) {
+                            _this.voiceText="";
+                          }
+                    );
+                }
+              })
+            }catch(e){
+               alert("playVoice is "+e);
+            }
+        },
+        dealType:function(data){
+           var _this=this;
+           var type=data.type.toUpperCase();
+           //var urlText="";
+           switch(type){
+              case 'URL':
+                 var urlContent=data.url;
+                 this.urlText="<div class='url-wrapper' data-url="+urlContent.url+" data-event="+'url-'+(parseInt(this.bindEvents.length)+1)+
+                 "><span class='url-title'>"+urlContent.title+"</span><span class='url-content'>"
+                 +urlContent.content+"</span></div>"
+                 this.voiceText+=urlContent.title + ""+urlContent.content;
+              break;
+              case 'SELECTS':
+                  var selectOptions=data.selects;
+                  
+                  this.urlText="<ul class='custom-select' data-event="+'select-'+(parseInt(this.bindEvents.length)+1)+"><li class='title'>"+data.text+"</li>";
+                  this.voiceText+=data.text;
+                  selectOptions.forEach(function(item,index){
+                      //console.log("this.urlText is ")
+                      _this.urlText+="<li class='custom-select-item' data-value='"+(parseInt(index)+1)+"'><span class='custom-select-index'>"+((parseInt(index)+1)+".")+"</span>"
+                      for(var key in item){
+                        _this.voiceText+=(parseInt(index)+1)+""+item[key];
+                        _this.urlText+="<span class='custom-select-"+key+"'>"+item[key]+"</span>";
+                      }
+                      _this.urlText+="</li>";
+                  })
+                  this.urlText+="</ul>";
+              break;
+              case 'TEXT'://纯文字
+                  this.urlText='<div class="message new">' + data.text + '</div>';
+                  this.voiceText+=data.text;
+              break;
+              case 'COMFIRM'://确认框带按钮
+                  console.log("confirm!");
+                  this.urlText+="<div class='custom-confirm message new' data-event="+'confirm-'+(parseInt(this.bindEvents.length)+1)+">"+
+                       "<div class='confirm-title'>"+data.text+"</div>"+
+                       "<div class='confirm-btn'><span class='confirm-sure'>是</span><span class='confirm-cancel'>否</span></div>"+
+                  "</div>";
+                  this.voiceText+=data.text;
+              break;
+              default:
+
+              break;
+
+           }
+           if(data.next){
+               //console.log("data is "+JSON.stringify(data.next));
+               arguments.callee.call(this,data.next);
+           }
+        },
+        //target是否已经绑定event
+        isHavedBind:function(target){
+            console.log("bindEvb is "+JSON.stringify(this.bindEvents));
+            var result=this.bindEvents.filter(function(item,index){
+                 //console.log("item is "+item.obj.getAttribute('data-event')+" and target is "+target.getAttribute('data-event'));
+                 return item.obj.getAttribute('data-event')==target.getAttribute('data-event');
+            });
+            return result;
         },
         //页面内点击跳转
         jump:function(){
           var _this=this;
            var urlWrapper=document.querySelectorAll(".url-wrapper");
-           console.log("length is "+urlWrapper.length);
+           //console.log("length is "+urlWrapper.length);
            for(var i=0,len=urlWrapper.length;i<len;i++){
-               this.bindEvent(urlWrapper[i],'click',function(e){
-                   var target=e.target;
-                   console.log("node name is "+target.nodeName);
-                   if(target.nodeName!='DIV'){
-                     target=target.parentNode;
-                   }
-                   var url=target.getAttribute('data-url');
-                   if(url){
-                     // localStorage.setItem("htmlContent",_this.html);
-                      location.href=url;
-                   }
-               })
+               var target=urlWrapper[i];
+               var result= _this.isHavedBind(target);
+               //console.log("result is "+result);
+               if(result.length>0){
+                 
+               }else{
+                 this.bindEvents.push({obj:target,eventName:'click'});
+                 this.bindEvent(urlWrapper[i],'click',function(e){
+                     _this.stopPlayVoice();
+                     var target=e.target;
+                     //console.log("node name is "+target.nodeName);
+                     if(target.nodeName!='DIV'){
+                       target=target.parentNode;
+                     }
+                     var url=target.getAttribute('data-url');
+                     if(url){
+                        localStorage.setItem("htmlContent",_this.html);
+                        localStorage.setItem('chatSessionId',window.chatSessionId);
+                        location.href=url;
+                       //window.open(url);
+
+                     }
+                 })
+               }
+           }
+           var selectWrapper=document.querySelectorAll(".custom-select");
+           for(var i=0,len=selectWrapper.length;i<len;i++){
+              var target=selectWrapper[i];
+              var result= _this.isHavedBind(target);
+              if(result.length>0){
+       
+              }else{
+                this.bindEvents.push({obj:target,eventName:'click'});
+                this.bindEvent(selectWrapper[i],'click',function(e){
+                    var target=e.target;
+                    _this.stopPlayVoice();
+                    if(target.nodeName=='SPAN'){
+                        target=target.parentNode;
+                    }
+                   // console.log("data-key is "+target.getAttribute('data-value'));
+                    if(target.getAttribute('data-value')==undefined){
+                      return;
+                    }else{
+                      console.log("value si "+target.getAttribute('data-value'));
+                      _this.mode=1;
+                      _this.sendMessage(target.getAttribute('data-value'));
+               
+                    }
+
+
+                });
+              }
+
+           }
+
+           var confirmWraper=document.querySelectorAll('.custom-confirm');
+           //console.log("confirmWraper length is "+confirmWraper.length);
+           for(var i=0,len=confirmWraper.length;i<len;i++){
+              var target=confirmWraper[i];
+              var result= _this.isHavedBind(target);
+              console.log("result is "+result.length);
+              if(result.length>0){
+       
+              }else{
+                this.bindEvents.push({obj:target,eventName:'click'});
+                this.bindEvent(target,'click',function(e){
+                    var target=e.target;
+                    _this.stopPlayVoice();
+                    //console.log("hei");
+                    if(target.nodeName!='SPAN'){
+                        return;
+                    }
+                    var val=target.innerText;
+                    if(val){
+                         _this.mode=1;
+                         _this.sendMessage(val);
+                    }
+                });
+              }
+
            }
         },
         scroll:function(){
             this.caculate();
             if(realScrollH > scrollerH){
                 var scrollTop=scrollerH - realScrollH;
+                console.log("scrollTop is "+scrollTop);
                 //$listContainer.style['transform']="tranlate3d(0,"+scrollTop+"px,0)"
                 this._pos(0,scrollTop);
             }
@@ -532,39 +700,48 @@
         },
         //接收结果后
         speakCallBack:function(data){
-            alert(data.resultStr); 
             this.sendMessage(data.resultStr);
+        },
+        //是否云之家客户端 
+        isYZJ:function(){
+          if(!navigator.userAgent.match(/Qing\/.*;(iOS|iPhone|Android).*/)){
+              return false;
+          }
+          return true;
+        },
+        //暂停播报
+        stopPlayVoice:function(){
+           var _this=this;
+           XuntongJSBridge.call('stopVoice', {localId:this.localId},
+                 function(result){
+                  if(String(result['success'])=='true'){
+                     _this.localId=0;
+                  }
+                }
+              );
         },
         //调用云之家语音接口
         speak:function(callback){
           var _this=this;
-          if(!navigator.userAgent.match(/Qing\/.*;(iOS|iPhone|Android).*/)){
+          if(!this.isYZJ()){
               alert("请用云之家打开!");
               return;
-          }
-           // try{
-           //  //voiceRecognize   
-           //   XuntongJSBridge.call('voiceAssistant',{
-           //      'recommendLabelArr':['测试数据'],
-           //      'recommendButtonArr':[],
-           //      'imageStr':''
-           //   },function(result){
-           //       if(result['success']=='true'){
-           //           _this.sendMessage(result.data.resultStr);
-           //       }else{
-           //          alert("error is "+result.error);
-           //       }
-           //   })
-           // }catch(e){
-           //    alert("speak is "+e);
-           // }
+          }   
+          if(this.localId!=0){
+             this.stopPlayVoice();
+          }       
            try{
                  XuntongJSBridge.call('voiceRecognize',{
 
                  },function(result){
-                     alert("result is "+JSON.stringify(result));
                      if(result['success']=='true'){
-                         _this.sendMessage(result.data.text);
+                         _this.mode=1;
+                         var text=result.data.text;
+                         if(isEmpty(text)){
+                            return ;
+                         }
+                         text=text.replace(/[\ |\~|\，|\。|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,""); 
+                         _this.sendMessage(text);
                      }
                  })
            }catch(e){
@@ -572,8 +749,11 @@
            }
         },
         sendMessage:function(content){
+            console.log("contentn is "+content+" and mode is "+this.mode);
             if(this.mode==0){//文字输入
                content=$input.value;
+               content=content.replace(/[\ |\~|\，|\。|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\<|\.|\>|\/|\?]/g,""); 
+               console.log("cntent is "+content);
                if(isEmpty(content)){
                   return;
                }
@@ -584,6 +764,9 @@
              this.clearInput();
              this.refresh();
              this.scroll();
+             if(this.mode==1){
+                this.mode=0;
+             }
         },
         setDate:function(){
             var d=new Date();
@@ -595,8 +778,8 @@
         insertMsg:function(type,content){
            var LI=document.createElement('LI');
            LI.classList.add('msg-item');
-           //https://s3-us-west-2.amazonaws.com/s.cdpn.io/156381/profile/profile-80.jpg
-           var inText='<div class="message message-personal"><figure class="avatar right-avatar"><img src='+this.imgArr[0]+' /></figure>'+content+'</div>'
+           //<figure class="avatar right-avatar"><img src='+this.imgArr[0]+' /></figure>
+           var inText='<div class="message message-personal">'+content+'</div>'
            LI.innerHTML=inText;
            var cloneNode=LI.cloneNode();
            cloneNode.innerHTML=inText;
@@ -613,12 +796,10 @@
            obj.removeEventListener(eventName,callback || this,false);
         },
         _pos: function (x, y) {
-            console.log("this.hScroll is "+this.hScroll+" and vScroll is "+this.vScroll);
              x = this.hScroll ? x : 0;
              y = this.vScroll ? y : 0;
 
             if (this.options.useTransform) {
-                console.log("test");
                 $scroller.style['-webkit-transform'] = 'translate(' + x + 'px,' + y + 'px)';
             } else {
                 x = m.round(x);
@@ -654,115 +835,11 @@
         },
         notInView:function(){
           var bottom=$footer.getBoundingClientRect().bottom;
-          $input.value=bottom +" "+window.innerHeight+" and winHeight";
           if(window.innerHeight - bottom <= 0){
              return true;
           }
           return false;
         },
-        //解决iOS 11键盘遮挡输入框的BUG
-        solutionOne:function(){
-            var str = navigator.userAgent.toLowerCase();
-            var ver = str.match(/cpu iphone os (.*?) like mac os/)[1].replace(/_/g,".");
-            var oc = ver.split('.')[0];
-            $input.value=oc;
-            if(oc > 10){
-                // ios11 不做处理
-                     this.timer = setInterval(function() {
-                    $input.value='输入框获取到焦点';
-                    document.body.scrollTop = document.body.scrollHeight;
-                }, 100);
-               // return true;
-            }else{
-                this.timer = setInterval(function() {
-                    $input.value='输入框获取到焦点';
-                    document.body.scrollTop = document.body.scrollHeight;
-                }, 100);
-            }
-        },
-        solutionTwo:function(){
-            //if(/Android/.test(navigator.appVersion)) {
-               if(document.activeElement.scrollIntoViewIfNeeded){
-                   $input.value="support!"
-                   $footer.scrollIntoViewIfNeeded();
-               }
-               //ios不会触发resize事件
-               // window.addEventListener("resize", function() {
-               //      if(document.activeElement.tagName=="INPUT" || document.activeElement.tagName=="TEXTAREA") {
-               //           window.setTimeout(function() {
-               //               document.activeElement.scrollIntoViewIfNeeded && document.activeElement.scrollIntoViewIfNeeded();
-               //           },0);
-               //       }
-               //   })
-           // }
-        },
-        solutionThree:function(){
-            // getBoundingClientRect 是获取定位的，很怪异, (iphone 6s 10.0 bate版表现特殊)
-            // top: 元素顶部到窗口（可是区域）顶部
-            // bottom: 元素底部到窗口顶部
-            // left: 元素左侧到窗口左侧
-            // right: 元素右侧到窗口左侧
-            // width/height 元素宽高
-               $input.value=JSON.stringify($footer.getBoundingClientRect());
-               var bottom = $footer.getBoundingClientRect().bottom
-              // $input.value=bottom;
-               // 可视区域高度 - 元素底部到窗口顶部的高度 < 0, 则说明被键盘挡住了
-            if (window.innerHeight - bottom < 0) {
-                $input.value="挡住了";
-                return true
-            }
-            return false
-        }
     }
     return ChatList;
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // //通过scrollIntoViewIfNeeded来将不在可视区域内的元素滚动至可视区域，如在可视区域则不滚动
-        // solutionTwo:function(){
-        //     //if(/Android/.test(navigator.appVersion)) {
-        //        if(document.activeElement.scrollIntoViewIfNeeded){
-        //            $input.value="support!"
-        //            $footer.scrollIntoViewIfNeeded();
-        //        }
-        //        //ios不会触发resize事件
-        //        window.addEventListener("resize", function() {
-        //             if(document.activeElement.tagName=="INPUT" || document.activeElement.tagName=="TEXTAREA") {
-        //                  window.setTimeout(function() {
-        //                      document.activeElement.scrollIntoViewIfNeeded && document.activeElement.scrollIntoViewIfNeeded();
-        //                  },0);
-        //              }
-        //          })
-        //    // }
-        // },
-        // //
-        // solutionThree:function(){
-        //     // getBoundingClientRect 是获取定位的，很怪异, (iphone 6s 10.0 bate版表现特殊)
-        //     // top: 元素顶部到窗口（可是区域）顶部
-        //     // bottom: 元素底部到窗口顶部
-        //     // left: 元素左侧到窗口左侧
-        //     // right: 元素右侧到窗口左侧
-        //     // width/height 元素宽高
-        //        $input.value=JSON.stringify($footer.getBoundingClientRect())
-        //        let bottom = $footer.getBoundingClientRect().bottom
-        //       // $input.value=bottom;
-        //        // 可视区域高度 - 元素底部到窗口顶部的高度 < 0, 则说明被键盘挡住了
-        //     if (window.innerHeight - bottom < 0) {
-        //         $input.value="挡住了";
-        //         return true
-        //     }
-        //     return false
-        // }

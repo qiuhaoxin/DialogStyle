@@ -1,63 +1,96 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8"/>
-              <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-        <style>
-            body{
-            	height:100%;
-            	width:100%;
-            }
-            ul{
-               padding:0;margin:0;	
-            }
-            ul li{
-            	height:60px;line-height: 50px;list-style: none;
-            }
-            .pages{
-            	display:flex;flex-direction: column;overflow: hidden;
-            }
-            .msg-list{
-            	height:90%;overflow: auto;flex-grow: 9;position: absolute;width:100%;left:0;
-            }
-            .footer{
-            	height:10%;position: absolute;z-index: 100;bottom: 0;left:0;width:100%;flex-grow: 1;
-            }
-        </style>
-    </head>
-    <body>
-     <div class="pages">
-          <div class="msg-list">
-             <ul>
-                 <li>test0</li>
-                 <li>test1</li>
-                 <li>test2</li>
-                 <li>test3</li>
-                 <li>test4</li>
-                 <li>test5</li>
-                 <li>test0</li>
-                 <li>test1</li>
-                 <li>test2</li>
-                 <li>test3</li>
-                 <li>test4</li>
-                 <li>test5</li>
-                 <li>test0</li>
-                 <li>test1</li>
-                 <li>test2</li>
-                 <li>test3</li>
-                 <li>test4</li>
-                 <li>test5</li>
-                 <li>test0</li>
-                 <li>test1</li>
-                 <li>test2</li>
-                 <li>test3</li>
-                 <li>test4</li>
-                 <li>test5</li>
-             </ul>
-          </div>
-          <div class="footer">
-             <input placehoder="shuru"/>
-          </div>
-      <div>      
-    </body>
-</html>
+ 1 <!DOCTYPE html>
+ 2 <html>
+ 3   <head>
+ 4     <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0">
+ 5     <title><%= title %></title>
+ 6     <link rel='stylesheet' href='/css/style.css' />
+ 7     <script src="/js/jquery-3.1.1.min.js" charset="utf-8"></script>
+ 8     <style>
+ 9       html, body {
+10         height: 100%;
+11         padding: 0;
+12         margin: 0;
+13       }
+14       header {
+15         position: fixed;
+16         top: 0;
+17         left: 0;
+18         z-index: 9999;
+19         width: 100%;
+20         height: 50px;
+21         line-height: 50px;
+22         font-size: 18px;
+23         text-align: center;
+24         background: #ccc;
+25       }
+26       main {
+27         position: absolute;
+28         top: 50px;
+29         bottom: 10px;
+30         left: 20px;
+31         width: 100%;
+32         margin-bottom: 50px;
+33         /* 使之可以滚动 */
+34         overflow-y: scroll;
+35         /* 增加该属性，可以增加弹性，是滑动更加顺畅 */
+36         -webkit-overflow-scrolling: touch;
+37       }
+38       footer {
+39         position: absolute;
+40         bottom: 0;
+41         left: 0;
+42         width: 100%;
+43         height: 50px;
+44         line-height: 50px;
+45         text-align: center;
+46         background: #666;
+47         border-top: 1px solid #e6e6e6;
+48       }
+49       footer input {
+50         display: inline-block;
+51         width: 90%;
+52         height: 20px;
+53         font-size: 14px;
+54         outline: none;
+55         border: 1px solid #e6e6e6;
+56         border-radius: 5px;
+57       }
+58     </style>
+59   </head>
+60   <body>
+61     <header>
+62       This is the header
+63     </header>
+64     <main>
+65       <h1><%= title %></h1>
+66       <p>Welcome to <%= title %></p>
+67       <ul>
+68         <li>Today</li>
+69         <li>is</li>
+70         <li>Sunday</li>
+71         <li>And</li>
+72         <li>I</li>
+73         <li>have</li>
+74         <li>to</li>
+75         <li>go</li>
+76         <li>to</li>
+77         <li>work</li>
+78         <li>tomorrow</li>
+79       </ul>
+     </main>
+     <footer>
+       <input type="text" placeholder="Type here...">
+     </footer>
+   </body>
+   <script type="text/javascript">
+     $(function() {
+       $('input').on('click', function () {
+         var target = this;
+         // 使用定时器是为了让输入框上滑时更加自然
+         setTimeout(function(){
+           target.scrollIntoView(true);
+         },100);
+       });
+     })
+   </script>
+ </html>

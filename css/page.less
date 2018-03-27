@@ -22,7 +22,8 @@ ul,li{
 body{
 	position:absolute;
 	left:0;width:100%;font-size:15px;
-	top:0;height:100%;background: #f8f8ff;
+	top:0;height:100%;background: #eef2f4;
+  font-family:'Helvetica Neue',Helvetica,sans-serif
 }
 .pages{
     height:100%;
@@ -46,7 +47,7 @@ body{
   flex-direction:column;
 }
 .footer{
-	height: 2.2rem;background: #fff;
+	height:2.5rem;background: #fff;
 	display: inline-flex;position:absolute;left:0;width:100%;bottom:0;z-index:100;
   justify-content:center;align-items:center;
 }
@@ -99,9 +100,8 @@ Messages
   margin: 8px 0;
   font-size: 16px;
   line-height: 1.4;
-  margin-left: 2.5rem;
+  margin-left: .5rem;
   position: relative;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   color:#fff;
 }
 .messages .message .timestamp {
@@ -114,7 +114,7 @@ Messages
   content: '';
   position: absolute;
   bottom: -6px;
-  border-top: 6px solid #2d8cf0;
+  border-top: 6px solid #fff;
   left: 0;
   border-right: 7px solid transparent;
 }
@@ -136,24 +136,26 @@ Messages
 }
 .messages .message.message-personal,.virtual .message.message-personal {
   float: right;
-  color: #fff;
+  color: #4f5255;
+  font-size:14px;
   text-align: right;
-  background: linear-gradient(120deg, #248A52, #257287);
+  background:#c5e4f6;
   border-radius: 10px 10px 0 10px;
-  margin-right:2.5rem;
+  margin-right:.5rem;
 }
 .messages .message.message-personal::before,.virtual .message.message-personal::before {
   left: auto;
   right: 0;
   border-right: none;
   border-left: 5px solid transparent;
-  border-top: 4px solid #257287;
+  border-top: 4px solid #c5e4f6;
   bottom: -4px;
 }
 .messages .message:last-child,.virtual .message:last-child {
   margin-bottom: 1rem;
 }
 .messages .message.new,.virtual .message.new {
+  background:#fff;color:#4f5255;font-size:14px;
   -webkit-transform: scale(0);
           transform: scale(0);
   -webkit-transform-origin: 0 0;
@@ -257,16 +259,13 @@ Bounce
   }
 }
 .voice{
-  flex-grow:4;
   display:inline-flex;
   align-items:center;
   height:1.6rem;
-  width:76%;
   font-size:15px;
   margin:.3rem .5rem .3rem 0px;
-  border:1px solid #FFA500;
-  background:#FFE4B5;
   border-radius:30px;color:#fff;justify-content:center;
+  width:100%;
 }
 .change{
   display:inline-flex;width:48px;
@@ -295,9 +294,14 @@ Bounce
 }
 .inputletter{
   display:inline-flex;
-  border:1px solid #eee;
-  border-radius:5px;
-  flex-grow:4;
+  & i{
+     color:#3cbaff;
+     margin-top:5px;margin-left:10px;
+  }
+  & input{
+      border:1px solid #eee;
+      border-radius:5px;
+  }
 }
 .right-avatar{
    right:-2.2rem;
@@ -311,14 +315,14 @@ Bounce
 .virtual{
     position:absolute;
     left:0;width:100%;
-    background:#f8f8ff;
+    background:#eef2f4;
     min-height:10px;
-    bottom:2rem;
+    top:0;
     z-index:101;
     visibility:hidden;
 }
 .url-wrapper{
-    max-width:15rem;
+    width:92%;
     background:#fff;
     border:1px solid #f8f8ff;
     border-radius:10px;
@@ -332,8 +336,80 @@ Bounce
     & span{
        display:block;
        padding:5px 8px;
-       color:#000;
+       color:#4f5255;
     }
 }
+
+
+.keyboard{
+  width:1.8rem;
+  height:1.8rem;
+  margin-left:.7rem;
+}
+.allkey{
+  width:1.8rem;
+  height:1.8rem;
+  margin-right:.2rem;
+}
+.ball{
+  flex-grow:4;
+  position:relative;
+  & div{
+        position:absolute;
+        left:50%;
+        margin-left:-1.6rem;
+        bottom:-.18rem;
+        border-radius:50%;
+        background:radial-gradient(circle at 21px 21px, #46E6FF, #3CBAFF);
+        box-shadow:0px 6px 6px rgba(6,8,10,.24);
+        height:3.2rem;width:3.2rem;
+        & img{
+           height:36px;
+           margin-left:21px;
+           margin-top:14px;
+        }
+  }
+}
+
+.custom-select{
+    max-width:92%;
+    margin:5px auto;
+    background:#fff;
+    border-radius:5px;
+    color:#4f5255;
+    & .title{
+       font-size:18px
+    }
+    & li{
+       list-style:none;
+       padding:10px 0;
+       padding-left:8px;
+       font-size:14px;
+       & span{
+          padding-left:7px;
+       }
+    }
+}
+.confirm-title{
+  font-size:16px;margin:8px 0;
+}
+.confirm-btn{
+   margin:10px 0;
+   font-size:14px;
+   & span{
+      padding:5px 26px;border-radius:4px;
+   }
+   & .confirm-sure{
+      background:#2d8cf0;color:#fff;
+   }
+   & .confirm-cancel{
+      color:red;background:#eee;margin-left:28px;
+   }
+}
+#socket_tip{
+    font-size:14px;margin-left:20px;color:#ccc;position:absolute;left:0;top:0;z-index:2;width:100%;
+}
+
+
 
 
