@@ -17,4 +17,15 @@ gulp.task('css',function(){
 	.pipe(gulp.dest('../dist/styles'));
 })
 
+gulp.task('cssnew',function(){
+	gulp.src("../css/newpage.less")
+	.pipe(gulpLess())
+	.pipe(gulpAutoprefixer({
+		browsers:['last 2 versions',"ie > 8"]
+	}))
+	.pipe(gulpCleanCss())
+	.pipe(gulpRename("newindex.min.css"))
+	.pipe(gulp.dest('../dist/newstyles'));
+})
+
 gulp.task("default",['css']);

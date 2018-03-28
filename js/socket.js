@@ -46,7 +46,8 @@
 
         eventTarget.addEventListener('open',function(e){self.onopen(e)});
         eventTarget.addEventListener('close',function(e){self.onclose(e)});
-        eventTarget.addEventListener('message',function(e){window.scoketTip.innerText="已连接服务器"+self.url;console.log("onmessage"); self.onmessage(e)});
+        eventTarget.addEventListener('message',function(e){//window.scoketTip.innerText="已连接服务器"+self.url;
+            console.log("onmessage"); self.onmessage(e)});
         eventTarget.addEventListener('error',function(e){self.onerror(e)});
         eventTarget.addEventListener('connecting',function(e){self.onconnecting(e)});
 
@@ -86,7 +87,7 @@
             // },self.timeoutInterval);
 
             ws.onopen=function(event){
-               window.scoketTip.innerText="已连接服务器"+self.url;
+               //window.scoketTip.innerText="已连接服务器"+self.url;
                console.log("url is "+self.url);
                //clearTimeout(timeout);
                if(self.debug || Socket.debugAll){
@@ -103,7 +104,7 @@
                }
             }
             ws.onclose = function(event) {
-                window.scoketTip.innerText="已关闭服务器链接";
+                //window.scoketTip.innerText="已关闭服务器链接";
                // clearTimeout(timeout);
                 //alert("webSocket close !")
                 ws = null;
@@ -132,7 +133,7 @@
                 }
             };
             ws.onmessage = function(event) { 
-                window.scoketTip.innerText="消息"+JSON.stringify(event.data);
+               // window.scoketTip.innerText="消息"+JSON.stringify(event.data);
                 if (self.debug || Socket.debugAll) {
                     console.debug('Socket', 'onmessage', self.url, event.data);
                 }
@@ -142,7 +143,7 @@
                 eventTarget.dispatchEvent(e);
             };
             ws.onerror = function(event) {
-                window.scoketTip.innerText="服务器错误";
+                //window.scoketTip.innerText="服务器错误";
                 if (self.debug || Socket.debugAll) {
                     console.debug('Socket', 'onerror', self.url, event);
                 }

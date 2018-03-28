@@ -1,18 +1,18 @@
 ;(function(global,factory){
     if(typeof define==='function' && define.amd){
-      define([],factory);
+    	define([],factory);
     }else if(typeof module!='undefined' && module.exports){
-      module.exports=factory();
+    	module.exports=factory();
     }else{
-      global.ChatList=factory();
+    	global.ChatList=factory();
     }
 })(this,function(){
     function getObjById(id){
        return document.getElementById(id);
     }
     function isEmpty(str){
-      var empty=/^\s*$/;
-      return empty.test(str);
+    	var empty=/^\s*$/;
+    	return empty.test(str);
     $}
     var $input=null;
     var $listContainer=null;
@@ -46,12 +46,13 @@
         TRNEND_EV = 'transitionend';
 
     var showVirtual=false;//是否显示虚拟的box;
-    //var $virtual=getObjById('virtual-box');//虚拟wrapper
-    //var $virtualList=getObjById('virtualList');
-
-
+    var $virtual=getObjById('virtual-box');//虚拟wrapper
+    var $virtualList=getObjById('virtualList');
     //var $scoketTip=getObjById('socket_tip');//用来提示websocket的状态
     //window.scoketTip=$scoketTip;
+     var winWidth=window.innerWidth;
+     var winHeight=window.innerHeight;
+     var $show=getObjById('show');
     function ChatList(options){
          var _this=this;
          this.$btn=getObjById('submit');//发送按钮
@@ -69,21 +70,21 @@
         window.message="明天从深圳到北京出差后天返回";
         //alert("window.mesage is "+window.message);
         socket=new Socket(address);
-        socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
+	      socket.setEventCallBack("onmessage",this.acceptMsg.bind(this))
         socket.open(false,function(){
             if(window.message && !isEmpty(window.message)){
                var chatSessionId=localStorage.getItem('chatSessionId');
                console.log("chatSessionId is "+chatSessionId);
-               _this.mode=1; 
-              ///_this.shouldShowVirtual();
-              _this.sendMessage(window.message);
-              _this.mode=0;
-
+               //if(chatSessionId || !isEmpty(chatSessionId)){
+                  
+               //}else{
+                   _this.mode=1; 
+                   _this.shouldShowVirtual();
+                   _this.sendMessage(window.message);
+                   _this.mode=0;
+               //}
            }
         });
-        // $scroller.style['transitionDuration']="0";
-        // $scroller.style['transformOrigin']="0 0";
-        // $scroller.style['transitionTimingFunction'] = 'cubic-bezier(0.33,0.66,0.66,1)';
         this.init();
     }
     ChatList.prototype={
@@ -105,248 +106,6 @@
             vScroll:true,
             useTransition:true
 
-        },
-        handleEvent:function(e){
-           var type=e.type;
-           switch(type){
-              case TOUCH_START:
-                  this.start(e)
-              break;
-              case TOUCH_MOVE:
-                  this.move(e);
-              break;
-              case TOUCH_END:
-                  this.end(e)
-              break;
-              case TRNEND_EV: 
-                  this._transitionEnd(e); 
-              break;
-           }
-        },
-        _transitionEnd:function(e){
-            var that = this;
-
-            if (e.target != $scroller) return;
-
-            that.unbindEvent($scroller,TRNEND_EV);
-
-            that._startAni();
-        },
-        start:function(e){
-             var pointer=e.touches[0] || e;
-             var that=this;
-              that.moved = false;
-              that.animating = false;
-
-              if (that.options.useTransition) that._transitionTime(0);
-             
-             that.distX=0;
-             that.distY=0;
-
-             that.dirX=0;
-             that.dirY=0;
-
-             that.startX=that.x;
-             that.startY=that.y;
-             that.pointX=pointer.pageX;
-             that.pointY=pointer.pageY;
-
-             that.startTime=e.timeStamp || Date.now();
-             this.bindEvent($scroller,TOUCH_MOVE);
-             this.bindEvent($scroller,TOUCH_END);
-             //页面滚动时input失去焦点
-             $input.blur();
-        },
-        move:function(e){
-             var that=this;
-             var pointer=e.touches[0]||e,
-                 deltaX=pointer.pageX - this.pointX,
-                 deltaY=pointer.pageY - this.pointY,
-                 newX=that.x + deltaX,
-                 newY=that.y + deltaY,
-                 timestamp=e.timeStamp || Date.now();
-
-              this.pointX=pointer.pageX;
-              this.pointY=pointer.pageY;
-              
-              this.distX+=deltaX;
-              this.distY+=deltaY;
-              this.absDistX=Math.abs(this.distX);
-              this.absDistY=Math.abs(this.distY);
-
-              if(this.absDistY > this.absDistX + 5){
-                  newX=this.x;
-                  deltaX=0;
-              }else if(this.absDistX > this.absDistY + 5){
-                  newY=this.y;
-                  deltaY=0;
-              }
-              this.moved=true;
-              this._pos(newX,newY);
-              this.dirX=deltaX > 0 ? -1 : deltaX < 0 ? 1 : 0;
-              this.dirY=deltaY > 0 ? 1 : deltaY < 0 ? 1 : 0;
-
-              if(timestamp - this.startTime > 300){
-                  this.startTime=timestamp;
-                  this.startX=this.x;
-                  this.startY=this.y;
-              }
-
-
-        },
-        end:function(e){
-            var that = this,
-                point = e.changedTouches[0] || e,
-                target, ev,
-                momentumX = { dist: 0, time: 0 },
-                momentumY = { dist: 0, time: 0 },
-                duration = (e.timeStamp || Date.now()) - that.startTime,
-                newPosX = that.x,
-                newPosY = that.y,
-                distX, distY,
-                newDuration;
-            this.unbindEvent($scroller,TOUCH_MOVE);
-            this.unbindEvent($scroller,TOUCH_END);
-            if (duration < 300) {
-                momentumX = newPosX ? that._momentum(newPosX - that.startX, duration, -that.x, that.scrollerW - that.wrapperW + that.x, that.options.bounce ? that.wrapperW : 0) : momentumX;
-                momentumY = newPosY ? that._momentum(newPosY - that.startY, duration, -that.y, (that.maxScrollY < 0 ? that.scrollerH - that.wrapperH + that.y - that.minScrollY : 0), that.options.bounce ? that.wrapperH : 0) : momentumY;
-
-                newPosX = that.x + momentumX.dist;
-                newPosY = that.y + momentumY.dist;
-
-                if ((that.x > 0 && newPosX > 0) || (that.x < that.maxScrollX && newPosX < that.maxScrollX)) momentumX = { dist: 0, time: 0 };
-                if ((that.y > that.minScrollY && newPosY > that.minScrollY) || (that.y < that.maxScrollY && newPosY < that.maxScrollY)) momentumY = { dist: 0, time: 0 };
-            }
-
-            if (momentumX.dist || momentumY.dist) {
-                newDuration = m.max(m.max(momentumX.time, momentumY.time), 10);
-
-                // Do we need to snap?
-                if (that.options.snap) {
-                    distX = newPosX - that.absStartX;
-                    distY = newPosY - that.absStartY;
-                    if (m.abs(distX) < that.options.snapThreshold && m.abs(distY) < that.options.snapThreshold) { that.scrollTo(that.absStartX, that.absStartY, 200); }
-                    else {
-                        snap = that._snap(newPosX, newPosY);
-                        newPosX = snap.x;
-                        newPosY = snap.y;
-                        newDuration = m.max(snap.time, newDuration);
-                    }
-                }
-
-                that.scrollTo(m.round(newPosX), m.round(newPosY), newDuration);
-                return;
-            }   
-            that._resetPos(100);
-        },
-        _resetPos: function (time) {
-            var that = this,
-                resetX = that.x >= 0 ? 0 : that.x < that.maxScrollX ? that.maxScrollX : that.x,
-                resetY = that.y >= that.minScrollY || that.maxScrollY > 0 ? that.minScrollY : that.y < that.maxScrollY ? that.maxScrollY : that.y;
-
-            if (resetX == that.x && resetY == that.y) {
-                if (that.moved) {
-                    that.moved = false;
-                    if (that.options.onScrollEnd) that.options.onScrollEnd.call(that);      // Execute custom code on scroll end
-                }
-
-                return;
-            }
-            that.scrollTo(resetX, resetY, time || 0);
-        },
-        scrollTo: function (x, y, time, relative) {
-            var that = this,
-                step = x,
-                i, l;
-
-            that.stop();
-
-            if (!step.length) step = [{ x: x, y: y, time: time, relative: relative }];
-
-            for (i = 0, l = step.length; i < l; i++) {
-                if (step[i].relative) { step[i].x = that.x - step[i].x; step[i].y = that.y - step[i].y; }
-                that.steps.push({ x: step[i].x, y: step[i].y, time: step[i].time || 0 });
-            }
-
-            that._startAni();
-        },
-        _startAni: function () {
-            var that = this,
-                startX = that.x, startY = that.y,
-                startTime = Date.now(),
-                step, easeOut,
-                animate;
-        
-            if (that.animating) return;
-
-            if (!that.steps.length) {
-                that._resetPos(400);
-                return;
-            }
-
-            step = that.steps.shift();
-
-            if (step.x == startX && step.y == startY) step.time = 0;
-
-            that.animating = true;
-            that.moved = true;
-
-            if (that.options.useTransition) {
-                that._transitionTime(step.time);
-                that._pos(step.x, step.y);
-                that.animating = false;
-                if (step.time) that.bindEvent($scroller,TRNEND_EV);
-                else that._resetPos(0);
-                return;
-            }
-
-            animate = function () {
-                var now = Date.now(),
-                    newX, newY;
-
-                if (now >= startTime + step.time) {
-                    that._pos(step.x, step.y);
-                    that.animating = false;
-                    if (that.options.onAnimationEnd) that.options.onAnimationEnd.call(that);            // Execute custom code on animation end
-                    that._startAni();
-                    return;
-                }
-
-                now = (now - startTime) / step.time - 1;
-                easeOut = m.sqrt(1 - now * now);
-                newX = (step.x - startX) * easeOut + startX;
-                newY = (step.y - startY) * easeOut + startY;
-                that._pos(newX, newY);
-                if (that.animating) that.aniTime = nextFrame(animate);
-            };
-
-            animate();
-        },
-        _transitionTime: function (time) {
-            time += 'ms';
-            $scroller.style['transitionDuration'] = time;
-        },
-        loadImg:function(srcArr){
-          srcArr.forEach(function(item){
-            var img=new Image();
-            img.src=item;
-            if(img.complete){
-              return;
-            }
-            img.onload=function(){
-              console.log("图片加载成功!");
-            }
-            img.onerror=function(){
-              console.error("加载图片出错啦!");
-            }
-          })
-        },
-        stop: function () {
-            if (this.options.useTransition) this.unbindEvent($scroller,TRNEND_EV);//this._unbind(TRNEND_EV);
-            else cancelFrame(this.aniTime);
-            this.steps = [];
-            this.moved = false;
-            this.animating = false;
         },
         init:function(){
             var _this=this;
@@ -404,7 +163,7 @@
                   clearInterval(_this.timer);//清除计时器
                   //document.body.scrollTop = bfscrolltop;//将软键盘唤起前的浏览器滚动部分高度重新赋给改变后的高度
                   showVirtual=false;
-                  //$virtual.style['visibility']="hidden";
+                  $virtual.style['visibility']="hidden";
                 })
             }
             this.refresh();
@@ -463,7 +222,7 @@
             if((parseInt(containerH) + 30) < boardScrollH){
               if($input==document.activeElement){
                  //showVirtual=true;
-                 //$virtual.style['visibility']="visible";
+                 $virtual.style['visibility']="visible";
               }
             }
         },
@@ -481,7 +240,7 @@
             cloneNode.innerHTML=this.urlText;//inerText;
             $listContainer.appendChild(LI);
             if(showVirtual || !isEmpty(window.message)){
-              //$virtualList.appendChild(cloneNode);
+              $virtualList.appendChild(cloneNode);
               window.message="";
             }
             if(data.type.toUpperCase()!='TEXT'){
@@ -774,9 +533,9 @@
            var cloneNode=LI.cloneNode();
            cloneNode.innerHTML=inText;
            $listContainer.appendChild(LI);
-          // if(showVirtual || !isEmpty(window.message)){
-           //  $virtualList.appendChild(cloneNode);
-           //}
+           if(showVirtual || !isEmpty(window.message)){
+             $virtualList.appendChild(cloneNode);
+           }
            this.html+="<li class='msg-item'>"+inText+"</li>";
         },
         bindEvent:function(obj,eventName,callback){
@@ -785,51 +544,7 @@
         unbindEvent:function(obj,eventName,callback){
            obj.removeEventListener(eventName,callback || this,false);
         },
-        _pos: function (x, y) {
-             x = this.hScroll ? x : 0;
-             y = this.vScroll ? y : 0;
 
-            if (this.options.useTransform) {
-                $scroller.style['-webkit-transform'] = 'translate(' + x + 'px,' + y + 'px)';
-            } else {
-                x = m.round(x);
-                y = m.round(y);
-                $scroller.style.left = x + 'px';
-                $scroller.style.top = y + 'px';
-            }
-
-            this.x = x;
-            this.y = y;
-        },
-        _momentum: function (dist, time, maxDistUpper, maxDistLower, size) {
-            var deceleration = 0.0006,
-                speed = Math.abs(dist) / time,
-                newDist = (speed * speed) / (2 * deceleration),
-                newTime = 0, outsideDist = 0;
-
-            // Proportinally reduce speed if we are outside of the boundaries
-            if (dist > 0 && newDist > maxDistUpper) {
-                outsideDist = size / (6 / (newDist / speed * deceleration));
-                maxDistUpper = maxDistUpper + outsideDist;
-                speed = speed * maxDistUpper / newDist;
-                newDist = maxDistUpper;
-            } else if (dist < 0 && newDist > maxDistLower) {
-                outsideDist = size / (6 / (newDist / speed * deceleration));
-                maxDistLower = maxDistLower + outsideDist;
-                speed = speed * maxDistLower / newDist;
-                newDist = maxDistLower;
-            }
-            newDist = newDist * (dist < 0 ? -1 : 1);
-            newTime = speed / deceleration;
-            return { dist: newDist, time: Math.round(newTime) };
-        },
-        notInView:function(){
-          var bottom=$footer.getBoundingClientRect().bottom;
-          if(window.innerHeight - bottom <= 0){
-             return true;
-          }
-          return false;
-        },
     }
     return ChatList;
 })

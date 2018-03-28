@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	<meta charset="utf8">
+    	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    	<style>
+    	   html,body,ul{
+    	   	   padding:0;margin:0;
+    	   }
+    	   body{
+              position: absolute;left:0;width:100%;top:0;height:100%;
+    	   }
+           ul{
+           	  width:100%;margin-bottom: 50px;overflow: scroll;height:100%;position:absolute;top:0;left:0;-webkit-overflow-scrolling:touch;
+           }
+           ul li{
+           	  list-style: none;
+           	  height: 50px;
+           	  line-height: 50px;
+           	  border-bottom: 1px solid #eee;
+           }
+           .footer{
+           	   position: fixed;
+           	   left:0;width:100%;height: 50px;z-index: 22;bottom:0;
+           	   background:#eee;
+           }
+           .footer input{
+           	   width:80%;margin-left:10%;
+           	   height:30px;margin-top:5px;
+           }
+        </style>
+    </head>
+    <body>
+    	<div class='wrapper'>
+    	   <div>
+		       <ul id="list">
+		           <li>测试1</li>
+		           <li>测试2</li>
+		           <li>测试3</li>
+		           <li>测试4</li>
+		           <li>测试5</li>
+		           <li>测试6</li>
+		           <li>测试7</li>
+		           <li>测试8</li>
+		           <li>测试9</li>
+		           <li>测试10</li>
+		           <li>测试12</li>
+		           <li>测试13</li>
+		           <li>测试14</li>
+		           <li>测试15</li>
+		           <li>测试16</li>
+		           <li>测试17</li>
+		           <li>测试18</li>
+		           <li>测试19</li>
+		           <li>测试20</li>
+		       </ul>
+    		</div>
+	       <div class='footer'>
+	           <input placeholder="请输入" id='input'/>
+	       </div>
+    	</div>
+
+       <script>
+            var inputObj=document.getElementById('input');
+            var list=document.getElementById('list');
+            inputObj.addEventListener('keyup',function(e){
+                 if(e.keyCode==13){
+                    console.log("input value is "+e.target.value);
+                    var LIOBJ=document.createElement('li');
+                    LIOBJ.innerText=e.target.value;
+                    list.appendChild(LIOBJ);
+                    console.log("scrollHeight is "+list.scrollHeight);
+                    list.scrollTop=list.scrollHeight+50;
+                 }
+            },false)
+       </script>
+    </body>
+</html>

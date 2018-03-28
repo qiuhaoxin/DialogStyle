@@ -1,6 +1,7 @@
 *,html,body{
 	-webkit-box-sizing:border-box;
    box-sizing:border-box;
+   -webkit-tap-highlight-color:rgba(0,0,0,0);
 }
 input{
 	outline: none;
@@ -26,14 +27,16 @@ body{
   font-family:'Helvetica Neue',Helvetica,sans-serif
 }
 .pages{
-    height:100%;
-    width:100%;
-    display:flex;
-    flex-direction: column;
-    overflow:auto;
+    //height:100%;
+    //width:100%;
+    //display:flex;
+    //flex-direction: column;
+    //overflow:auto;
+   // position:relative;
 }
 #list{
-  overflow-y:scroll;position:absolute;z-index:88;    -webkit-overflow-scrolling:touch;
+  //overflow-y:scroll
+  overflow:scroll;position:absolute;z-index:88;    -webkit-overflow-scrolling:touch;left:0;top:0;padding-bottom:60px;height:100%;
 }
 .pages ul{
    width:100%;
@@ -42,13 +45,13 @@ body{
 	list-style: none;
 }
 .messages,.virtual{
-	display: flex;
-	flex:1 1 1px;
-  flex-direction:column;
+	//display: flex;
+	//flex:1 1 1px;
+  //flex-direction:column;
 }
 .footer{
 	height:2.5rem;background: #fff;
-	display: inline-flex;position:absolute;left:0;width:100%;bottom:0;z-index:100;
+	display: inline-flex;position:fixed;left:0;width:100%;bottom:0;z-index:100;
   justify-content:center;align-items:center;
 }
 .footer:before{
@@ -77,12 +80,12 @@ button{
 Messages
 --------------------*/
 .messages,.virtual {
-  -webkit-box-flex: 1;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
+  //-webkit-box-flex: 1;
+     // -ms-flex: 1 1 auto;
+         // flex: 1 1 auto;
   color: rgba(255, 255, 255, 0.5);
-  position: relative;
-  width: 100%;
+  //position: relative;
+  //width: 100%;
 }
 .message-content,.mCSB_container{
   overflow:hidden;
@@ -377,6 +380,7 @@ Bounce
     background:#fff;
     border-radius:5px;
     color:#4f5255;
+    margin-bottom:20px;
     & .title{
        font-size:18px
     }
@@ -407,7 +411,7 @@ Bounce
    }
 }
 #socket_tip{
-    font-size:14px;margin-left:20px;color:#ccc;position:absolute;left:0;top:0;z-index:2;width:100%;
+  position:absolute;left:0;width:100%;top:0;color:#ccc;font-size:12px;
 }
 
 
