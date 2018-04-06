@@ -20,7 +20,7 @@
            	  border-bottom: 1px solid #eee;
            }
            .footer{
-           	   position: fixed;
+           	   position: absolute;
            	   left:0;width:100%;height: 50px;z-index: 22;bottom:0;
            	   background:#eee;
            }
@@ -55,11 +55,11 @@
 		           <li>测试20</li>
 		       </ul>
     		</div>
-	       <div class='footer'>
+	       <div class='footer' id='footer'>
 	           <input placeholder="请输入" id='input'/>
 	       </div>
     	</div>
-
+      <script src="../js/jquery-1.8.3.min.js"></script>
        <script>
             var inputObj=document.getElementById('input');
             var list=document.getElementById('list');
@@ -73,6 +73,27 @@
                     list.scrollTop=list.scrollHeight+50;
                  }
             },false)
+            inputObj.addEventListener('click',function(e){
+            	//alert('focus');
+            	var target=document.getElementById('footer');
+               setInterval(function(){
+                  target.scrollIntoView(true);
+                  target.scrollIntoViewIfNeeded();
+               },200)
+            })
+            var data={"province":"天津","city":"天津","role":"客户","name":"sdfs","linkman":"sdfsd","email":"","tel":"15817497846","product":"","version":"14.0"};
+            $.ajax({
+                url:'http://localhost/SVS/K3LADLStatistics/insertCustomer',
+                dataType:'json',
+                type:'POST',
+                data:{InFo:JSON.stringify(data)},
+                success:function(data){
+                   console.log("data is "+data);
+                },
+                error:function(){
+
+                }
+            })
        </script>
     </body>
 </html>

@@ -1,30 +1,34 @@
 ﻿<!DOCTYPE html>
 <html>
    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-      <title>chatbox</title>
-      <link rel="stylesheet" href="../css/style.css"/>
-      <link rel="stylesheet" href="../dist/styles/index.min.css" />
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no"/>
+      <title>chatbot</title>
+      <link rel="stylesheet" href="../static/chatbot/style.css"/>
+      <link rel="stylesheet" href="../static/chatbot/index.min.css" />
    </head>
    <body>
       <div class="pages">
+        <div id="socket_tip">正在链接服务器</div>
+        <div class="messages" id="msg">
+
           <ul id="list">
 
           </ul>
-        	<div class="footer change-v" id="footer">
-              <div class="inputletter">
-                  <i class="icon icon-microphone" id="changeVoice"></i>
-                  <input  placeholder="请输入" />
-              </div>
-              <div class="voice">
-                  <img src="../images/robot_keyboard.png" class="keyboard" id="change"/>
-                  <figure class="ball">
-                    <div id="voice"><img src="../images/robot_mic.png"/></div>
-                  </figure>
-                  <img src="../images/robot_allkey.png" class="allkey"/>
-              </div>
-        	</div>
+        </div>
+        <div class="footer change-v" id="footer">
+             <div class="inputletter">
+                <i class="icon icon-microphone" id="changeVoice"></i>
+                <input  placeholder="请输入" />
+            </div>
+            <div class="voice">
+                <img src="../static/chatbot/images/robot_keyboard.png" class="keyboard" id="change"/>
+                <figure class="ball">
+                  <div id="voice"><img src="../static/chatbot/images/robot_mic.png"/></div>
+                </figure>
+                <img src="../static/chatbot/images/robot_allkey.png" class="allkey"/>
+            </div>
+        </div>
       </div>
     <script th:inline="JavaScript">  
     /*<![CDATA[*/  
@@ -35,18 +39,23 @@
         var avatar=[[${avatar}]];
     /*]]>*/  
     </script> 
-     <script src="../js/rem.js"></script>
-      <script src="../js/socket.js"></script>
-      <script src="../js/jquery-3.3.1.min.js"></script>
-      <script src="../js/chatlist.js"></script> 
-      <script src="../js/qingjs.js"></script>
+      <script src="../static/chatbot/rem.js"></script>
+      <script src="../static/chatbot/socket.js"></script>
+      <script src="../static/chatbot/chatlist.js?v=1.0.2"></script>
+      <script src="../static/chatbot/qingjs.js"></script>
       <script type="text/javascript">
-          document.addEventListener('touchmove',function(e){
-              e.preventDefault();
-          },false)
+          try{
           var chatList=new ChatList();
+
           //设置页面title:小K机器人
+
           XuntongJSBridge.call('setWebViewTitle',{'title':'小K机器人'});//设置页面标题并显示
+              
+          }catch(e){
+             alert("e is "+e);
+          }
+          
+ 
       </script>
    </body>
 </html>

@@ -87,7 +87,7 @@
             // },self.timeoutInterval);
 
             ws.onopen=function(event){
-               //window.scoketTip.innerText="已连接服务器"+self.url;
+               window.scoketTip.innerText="已连接服务器"+self.url;
                console.log("url is "+self.url);
                //clearTimeout(timeout);
                if(self.debug || Socket.debugAll){
@@ -104,7 +104,7 @@
                }
             }
             ws.onclose = function(event) {
-                //window.scoketTip.innerText="已关闭服务器链接";
+                window.scoketTip.innerText="已关闭服务器链接"+self.url;
                // clearTimeout(timeout);
                 //alert("webSocket close !")
                 ws = null;
